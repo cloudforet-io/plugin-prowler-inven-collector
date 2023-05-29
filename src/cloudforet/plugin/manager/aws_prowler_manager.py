@@ -88,9 +88,12 @@ class AWSProwlerManager(CollectorManager):
         results = []
         for compliance_result in compliance_results.values():
             compliance_result['data']['display'] = self._make_compliance_display(compliance_result['data']['stats'])
+            compliance_result['data']['score']['percent'] = self._calculate_score(compliance_result['data']['stats'])
+
             changed_checks = []
             for check in compliance_result['data']['checks'].values():
                 check['display'] = self._make_check_display(check['stats'])
+                check['score']['percent'] = self._calculate_score(check['stats'])
                 changed_checks.append(check)
 
             compliance_result['data']['checks'] = changed_checks
@@ -101,27 +104,28 @@ class AWSProwlerManager(CollectorManager):
 
     @staticmethod
     def _make_check_display(check_stats):
-        score_pass = check_stats['score']['pass']
-        score_total = check_stats['score']['total']
         findings_pass = check_stats['findings']['pass']
         findings_total = check_stats['findings']['total']
 
         return {
-            'score': round(score_pass / score_total * 100, 1),
             'findings': f'{findings_pass}/{findings_total}'
         }
 
     @staticmethod
+    def _calculate_score(stats):
+        score_pass = stats['score']['pass']
+        score_total = stats['score']['total']
+
+        return round(score_pass / score_total * 100, 1)
+
+    @staticmethod
     def _make_compliance_display(compliance_data_stats):
-        score_pass = compliance_data_stats['score']['pass']
-        score_total = compliance_data_stats['score']['total']
         checks_pass = compliance_data_stats['checks']['pass']
         checks_total = compliance_data_stats['checks']['total']
         findings_pass = compliance_data_stats['findings']['pass']
         findings_total = compliance_data_stats['findings']['total']
 
         return {
-            'score': round(score_pass / score_total * 100, 1),
             'checks': f'{checks_pass}/{checks_total}',
             'findings': f'{findings_pass}/{findings_total}'
         }
@@ -148,7 +152,8 @@ class AWSProwlerManager(CollectorManager):
                 'score': {
                     'total': 0,
                     'pass': 0,
-                    'fail': 0
+                    'fail': 0,
+                    'percent': 0
                 },
                 'findings': {
                     'total': 0,
@@ -238,7 +243,8 @@ class AWSProwlerManager(CollectorManager):
                     'score': {
                         'total': 0,
                         'pass': 0,
-                        'fail': 0
+                        'fail': 0,
+                        'percent': 0
                     },
                     'checks': {
                         'total': 0,
@@ -249,6 +255,15 @@ class AWSProwlerManager(CollectorManager):
                         'total': 0,
                         'pass': 0,
                         'fail': 0
+                    }
+                }
+            },
+            'metadata': {
+                'view': {
+                    'sub_data': {
+                        'reference': {
+                            'resource_type': 'inventory.CloudServiceType'
+                        }
                     }
                 }
             },

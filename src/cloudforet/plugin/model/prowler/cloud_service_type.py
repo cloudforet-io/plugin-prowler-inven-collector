@@ -17,8 +17,8 @@ _METADATA = {
                 'name': 'Status'
             },
             {
-                'key': 'data.display.score',
-                'name': 'Score (%)',
+                'key': 'data.stats.score.percent',
+                'name': 'Compliance Score',
                 'data_type': 'float'
             },
             {
@@ -75,11 +75,8 @@ _METADATA = {
                         },
                         {
                             'type': 'text',
-                            'key': 'data.display.score',
-                            'name': 'Score',
-                            'options': {
-                                'is_optional': True
-                            }
+                            'key': 'data.stats.score.percent',
+                            'name': 'Compliance Score'
                         },
                         {
                             'type': 'text',
@@ -95,80 +92,85 @@ _METADATA = {
                 }
             }
         },
-        # 'widget': [
-        #     {
-        #         'name': 'Total Count',
-        #         'type': 'summary',
-        #         'options': {
-        #             'value_options': {
-        #                 'key': 'value',
-        #                 'options': {
-        #                     'default': 0
-        #                 }
-        #             }
-        #         },
-        #         'query': {
-        #             'aggregate': [
-        #                 {
-        #                     'count': {
-        #                         'name': 'value'
-        #                     }
-        #                 }
-        #             ],
-        #             'filter': []
-        #         }
-        #     },
-        #     {
-        #         'name': 'Failed Count',
-        #         'type': 'summary',
-        #         'options': {
-        #             'value_options': {
-        #                 'key': 'value',
-        #                 'options': {
-        #                     'default': 0
-        #                 }
-        #             }
-        #         },
-        #         'query': {
-        #             'aggregate': [
-        #                 {
-        #                     'count': {
-        #                         'name': 'value'
-        #                     }
-        #                 }
-        #             ],
-        #             'filter': [
-        #                 {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
-        #             ]
-        #         }
-        #     },
-        #     {
-        #         'name': 'Compliance Score (%)',
-        #         'type': 'summary',
-        #         'options': {
-        #             'value_options': {
-        #                 'key': 'value',
-        #                 'options': {
-        #                     'default': 0,
-        #                     'postfix': '%'
-        #                 }
-        #             }
-        #         },
-        #         'query': {
-        #             'aggregate': [
-        #                 {
-        #                     'average': {
-        #                         'key': 'data.display.score',
-        #                         'name': 'value'
-        #                     }
-        #                 }
-        #             ],
-        #             'filter': [
-        #                 {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
-        #             ]
-        #         }
-        #     },
-        # ],
+        'widget': [
+            {
+                'name': 'Total Count',
+                'type': 'summary',
+                'options': {
+                    'value_options': {
+                        'key': 'value',
+                        'options': {
+                            'default': 0
+                        }
+                    }
+                },
+                'query': {
+                    'aggregate': [
+                        {
+                            'count': {
+                                'name': 'value'
+                            }
+                        }
+                    ],
+                    'filter': [
+                        {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
+                        {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
+                    ]
+                }
+            },
+            {
+                'name': 'Failed Count',
+                'type': 'summary',
+                'options': {
+                    'value_options': {
+                        'key': 'value',
+                        'options': {
+                            'default': 0
+                        }
+                    }
+                },
+                'query': {
+                    'aggregate': [
+                        {
+                            'count': {
+                                'name': 'value'
+                            }
+                        }
+                    ],
+                    'filter': [
+                        {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
+                        {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
+                        {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
+                    ]
+                }
+            },
+            {
+                'name': 'Compliance Score',
+                'type': 'summary',
+                'options': {
+                    'value_options': {
+                        'key': 'value',
+                        'options': {
+                            'default': 0
+                        }
+                    }
+                },
+                'query': {
+                    'aggregate': [
+                        {
+                            'average': {
+                                'key': 'data.stats.score.percent',
+                                'name': 'value'
+                            }
+                        }
+                    ],
+                    'filter': [
+                        {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
+                        {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
+                    ]
+                }
+            },
+        ],
         'sub_data': {
             'layouts': [
                 {
@@ -299,9 +301,7 @@ _METADATA = {
 
 
 class CloudServiceType(BaseCloudServiceType):
-    name: str
     group: str = 'Prowler'
-    provider: str
     is_primary: bool = True
     is_major: bool = True
     metadata: dict = _METADATA
