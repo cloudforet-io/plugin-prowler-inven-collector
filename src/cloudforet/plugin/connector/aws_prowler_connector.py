@@ -13,6 +13,7 @@ __all__ = ['AWSProwlerConnector']
 
 _LOGGER = logging.getLogger(__name__)
 _AWS_PROFILE_PATH = os.environ.get('AWS_SHARED_CREDENTIALS_FILE', os.path.expanduser('~/.aws/credentials'))
+_AWS_PROFILE_DIR = _AWS_PROFILE_PATH.rsplit('/', 1)[0]
 
 
 class AWSProfileManager:
@@ -39,6 +40,10 @@ class AWSProfileManager:
         _LOGGER.debug(f'[_AWSProfileManager] add aws profile: {self._profile_name}')
 
         aws_profile = configparser.ConfigParser()
+
+        if os.path.exists(_AWS_PROFILE_PATH) is False:
+            self._create_aws_profile_file(aws_profile)
+
         aws_profile.read(_AWS_PROFILE_PATH)
 
         if self.profile_name in aws_profile.sections():
@@ -49,6 +54,13 @@ class AWSProfileManager:
         for key, value in self._credentials.items():
             aws_profile.set(self.profile_name, key, value)
 
+        with open(_AWS_PROFILE_PATH, 'w') as f:
+            aws_profile.write(f)
+
+    @staticmethod
+    def _create_aws_profile_file(aws_profile: configparser.ConfigParser):
+        os.makedirs(_AWS_PROFILE_DIR, exist_ok=True)
+        aws_profile['default'] = {}
         with open(_AWS_PROFILE_PATH, 'w') as f:
             aws_profile.write(f)
 
