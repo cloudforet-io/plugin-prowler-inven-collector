@@ -83,7 +83,7 @@ _METADATA = {
                         },
                         {
                             'type': 'text',
-                            'key': 'severity',
+                            'key': 'data.severity',
                             'name': 'Severity'
                         },
                         {
