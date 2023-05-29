@@ -169,7 +169,132 @@ _METADATA = {
                     ]
                 }
             },
-        ]
+        ],
+        'sub_data': {
+            'layouts': [
+                {
+                    'type': 'table',
+                    'name': 'Checks',
+                    'options': {
+                        'fields': [
+                            {
+                                'type': 'text',
+                                'key': 'check_title',
+                                'name': 'Check Title'
+                            },
+                            {
+                                'type': 'enum',
+                                'name': 'Status',
+                                'key': 'status',
+                                'options': {
+                                    'FAIL': {
+                                        'type': 'badge',
+                                        'options': {
+                                            'background_color': 'coral.500'
+                                        }
+                                    },
+                                    'PASS': {
+                                        'type': 'badge',
+                                        'options': {
+                                            'background_color': 'indigo.500'
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'display.findings',
+                                'name': 'Findings',
+                                'options': {
+                                    'sortable': False
+                                }
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'service',
+                                'name': 'Service'
+                            },
+                            {
+                                'type': 'enum',
+                                'key': 'severity',
+                                'name': 'Severity'
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'audit',
+                                'name': 'Audit'
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'risk',
+                                'name': 'Risk'
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'recommendation.description',
+                                'name': 'Recommendations'
+                            }
+                        ],
+                        'root_path': 'data.checks'
+                    }
+                },
+                {
+                    'type': 'table',
+                    'name': 'Findings',
+                    'options': {
+                        'fields': [
+                            {
+                                'type': 'text',
+                                'key': 'check_title',
+                                'name': 'Check Title'
+                            },
+                            {
+                                'type': 'enum',
+                                'name': 'Status',
+                                'key': 'status',
+                                'options': {
+                                    'FAIL': {
+                                        'type': 'badge',
+                                        'options': {
+                                            'background_color': 'coral.500'
+                                        }
+                                    },
+                                    'PASS': {
+                                        'type': 'badge',
+                                        'options': {
+                                            'background_color': 'indigo.500'
+                                        }
+                                    },
+                                    'INFO': {
+                                        'type': 'badge',
+                                        'options': {
+                                            'background_color': 'peacock.500'
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'resource_type',
+                                'name': 'Resource Type'
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'resource',
+                                'name': 'Resource'
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'region_code',
+                                'name': 'Region',
+                                'reference': 'inventory.Region'
+                            },
+                        ],
+                        'root_path': 'data.findings'
+                    }
+                }
+            ]
+        }
     }
 }
 

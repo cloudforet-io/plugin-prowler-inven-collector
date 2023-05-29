@@ -125,7 +125,7 @@ class AWSProwlerManager(CollectorManager):
     def _make_check(self, check_result: dict) -> dict:
         check = {
             'check_id': check_result['CheckID'],
-            'title': check_result['CheckTitle'],
+            'check_title': check_result['CheckTitle'],
             'service': check_result['ServiceName'],
             'sub_service': check_result['SubServiceName'],
             'check_type': check_result['CheckType'],
