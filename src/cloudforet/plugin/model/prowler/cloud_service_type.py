@@ -78,14 +78,13 @@ _METADATA = {
                             'key': 'data.display.score',
                             'name': 'Score',
                             'options': {
-                                'postfix': '%',
                                 'is_optional': True
                             }
                         },
                         {
-                            'type': 'integer',
-                            'key': 'data.failed_resource_count',
-                            'name': 'Failed Resources'
+                            'type': 'text',
+                            'key': 'severity',
+                            'name': 'Severity'
                         },
                         {
                             'type': 'text',
@@ -96,80 +95,80 @@ _METADATA = {
                 }
             }
         },
-        'widget': [
-            {
-                'name': 'Total Count',
-                'type': 'summary',
-                'options': {
-                    'value_options': {
-                        'key': 'value',
-                        'options': {
-                            'default': 0
-                        }
-                    }
-                },
-                'query': {
-                    'aggregate': [
-                        {
-                            'count': {
-                                'name': 'value'
-                            }
-                        }
-                    ],
-                    'filter': []
-                }
-            },
-            {
-                'name': 'Failed Count',
-                'type': 'summary',
-                'options': {
-                    'value_options': {
-                        'key': 'value',
-                        'options': {
-                            'default': 0
-                        }
-                    }
-                },
-                'query': {
-                    'aggregate': [
-                        {
-                            'count': {
-                                'name': 'value'
-                            }
-                        }
-                    ],
-                    'filter': [
-                        {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
-                    ]
-                }
-            },
-            {
-                'name': 'Compliance Score (%)',
-                'type': 'summary',
-                'options': {
-                    'value_options': {
-                        'key': 'value',
-                        'options': {
-                            'default': 0,
-                            'postfix': '%'
-                        }
-                    }
-                },
-                'query': {
-                    'aggregate': [
-                        {
-                            'average': {
-                                'key': 'data.display.score',
-                                'name': 'value'
-                            }
-                        }
-                    ],
-                    'filter': [
-                        {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
-                    ]
-                }
-            },
-        ],
+        # 'widget': [
+        #     {
+        #         'name': 'Total Count',
+        #         'type': 'summary',
+        #         'options': {
+        #             'value_options': {
+        #                 'key': 'value',
+        #                 'options': {
+        #                     'default': 0
+        #                 }
+        #             }
+        #         },
+        #         'query': {
+        #             'aggregate': [
+        #                 {
+        #                     'count': {
+        #                         'name': 'value'
+        #                     }
+        #                 }
+        #             ],
+        #             'filter': []
+        #         }
+        #     },
+        #     {
+        #         'name': 'Failed Count',
+        #         'type': 'summary',
+        #         'options': {
+        #             'value_options': {
+        #                 'key': 'value',
+        #                 'options': {
+        #                     'default': 0
+        #                 }
+        #             }
+        #         },
+        #         'query': {
+        #             'aggregate': [
+        #                 {
+        #                     'count': {
+        #                         'name': 'value'
+        #                     }
+        #                 }
+        #             ],
+        #             'filter': [
+        #                 {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
+        #             ]
+        #         }
+        #     },
+        #     {
+        #         'name': 'Compliance Score (%)',
+        #         'type': 'summary',
+        #         'options': {
+        #             'value_options': {
+        #                 'key': 'value',
+        #                 'options': {
+        #                     'default': 0,
+        #                     'postfix': '%'
+        #                 }
+        #             }
+        #         },
+        #         'query': {
+        #             'aggregate': [
+        #                 {
+        #                     'average': {
+        #                         'key': 'data.display.score',
+        #                         'name': 'value'
+        #                     }
+        #                 }
+        #             ],
+        #             'filter': [
+        #                 {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
+        #             ]
+        #         }
+        #     },
+        # ],
         'sub_data': {
             'layouts': [
                 {
@@ -211,13 +210,13 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'service',
-                                'name': 'Service'
-                            },
-                            {
-                                'type': 'enum',
                                 'key': 'severity',
                                 'name': 'Severity'
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'service',
+                                'name': 'Service'
                             },
                             {
                                 'type': 'text',

@@ -14,11 +14,12 @@ _SEVERITY_MAP = {
     'low': 'LOW',
 }
 
-_DEFAULT_SEVERITY_SCORE = {
-    'critical': 4,
-    'high': 3,
-    'medium': 2,
-    'low': 1,
+_SEVERITY_SCORE_MAP = {
+    'CRITICAL': 4,
+    'HIGH': 3,
+    'MEDIUM': 2,
+    'LOW': 1,
+    'UNKNOWN': 1
 }
 
 
@@ -60,12 +61,15 @@ class AWSProwlerManager(CollectorManager):
                 compliance_id = f'{self.cloud_service_type}:{requirement_id}:{account}'
                 check_id = check_result['CheckID']
                 status = check_result['Status']
-                severity = check_result['Severity']
-                score = _DEFAULT_SEVERITY_SCORE.get(severity, 1)
+                severity = _SEVERITY_MAP.get(check_result['Severity'], 'UNKNOWN')
+                score = _SEVERITY_SCORE_MAP[severity]
 
                 if compliance_id not in compliance_results:
                     compliance_results[compliance_id] = self._make_base_compliance_result(
-                        compliance_id, requirement_id, check_result)
+                        compliance_id, requirement_id, severity, check_result)
+
+                compliance_results[compliance_id]['data']['severity'] = self._update_severity(
+                    compliance_results[compliance_id]['data']['severity'], severity)
 
                 compliance_results[compliance_id]['data'] = self._update_compliance_status_and_stats(
                     compliance_results[compliance_id]['data'], status, score)
@@ -121,6 +125,12 @@ class AWSProwlerManager(CollectorManager):
             'checks': f'{checks_pass}/{checks_total}',
             'findings': f'{findings_pass}/{findings_total}'
         }
+
+    @staticmethod
+    def _update_severity(old_severity: str, new_severity: str) -> str:
+        if _SEVERITY_SCORE_MAP[old_severity] < _SEVERITY_SCORE_MAP[new_severity]:
+            return new_severity
+        return old_severity
 
     def _make_check(self, check_result: dict) -> dict:
         check = {
@@ -203,16 +213,18 @@ class AWSProwlerManager(CollectorManager):
 
         return compliance_result_data
 
-    def _make_base_compliance_result(self, compliance_id: str, requirement_id: str, check_result: dict) -> dict:
+    def _make_base_compliance_result(self, compliance_id: str, requirement_id: str, severity: str,
+                                     check_result: dict) -> dict:
         compliance_result = {
-            'name': f'{requirement_id} {check_result["Description"]}',
+            'name': check_result['Description'],
             'reference': {
                 'resource_id': compliance_id,
             },
             'data': {
                 'requirement_id': requirement_id,
-                'description': check_result['Description'],
+                # 'description': check_result['Description'],
                 'status': 'PASS',
+                'severity': severity,
                 'service': check_result['ServiceName'],
                 'checks': {},
                 'findings': [],
