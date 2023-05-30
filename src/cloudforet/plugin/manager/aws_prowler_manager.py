@@ -88,12 +88,13 @@ class AWSProwlerManager(CollectorManager):
         results = []
         for compliance_result in compliance_results.values():
             compliance_result['data']['display'] = self._make_compliance_display(compliance_result['data']['stats'])
-            compliance_result['data']['score']['percent'] = self._calculate_score(compliance_result['data']['stats'])
+            compliance_result['data']['stats']['score']['percent'] = \
+                self._calculate_score(compliance_result['data']['stats'])
 
             changed_checks = []
             for check in compliance_result['data']['checks'].values():
                 check['display'] = self._make_check_display(check['stats'])
-                check['score']['percent'] = self._calculate_score(check['stats'])
+                check['stats']['score']['percent'] = self._calculate_score(check['stats'])
                 changed_checks.append(check)
 
             compliance_result['data']['checks'] = changed_checks
