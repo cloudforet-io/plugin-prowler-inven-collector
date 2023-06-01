@@ -31,6 +31,10 @@ _METADATA = {
                 'name': '',
                 'type': 'query-search-table',
                 'options': {
+                    'default_sort': {
+                        'key': 'data.requirement_id',
+                        'desc': False
+                    },
                     'fields': [
                         {
                             'type': 'text',
@@ -113,8 +117,8 @@ _METADATA = {
                         }
                     ],
                     'filter': [
-                        {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
-                        {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
+                        # {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
+                        # {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
                     ]
                 }
             },
@@ -138,8 +142,8 @@ _METADATA = {
                         }
                     ],
                     'filter': [
-                        {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
-                        {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
+                        # {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
+                        # {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
                         {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
                     ]
                 }
@@ -165,8 +169,8 @@ _METADATA = {
                         }
                     ],
                     'filter': [
-                        {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
-                        {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
+                        # {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
+                        # {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
                     ]
                 }
             },
@@ -282,7 +286,11 @@ _METADATA = {
                             {
                                 'type': 'text',
                                 'key': 'resource',
-                                'name': 'Resource'
+                                'name': 'Resource',
+                                'reference': {
+                                    'resource_type': 'inventory.CloudService',
+                                    'reference_key': 'reference.resource_id'
+                                }
                             },
                             {
                                 'type': 'text',
