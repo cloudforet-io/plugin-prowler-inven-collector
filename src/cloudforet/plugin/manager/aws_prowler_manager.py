@@ -263,7 +263,12 @@ class AWSProwlerManager(CollectorManager):
                 'view': {
                     'sub_data': {
                         'reference': {
-                            'resource_type': 'inventory.CloudServiceType'
+                            'resource_type': 'inventory.CloudServiceType',
+                            'options': {
+                                'provider': self.provider,
+                                'cloud_service_group': self.cloud_service_group,
+                                'cloud_service_type': self.cloud_service_type,
+                            }
                         }
                     }
                 }
