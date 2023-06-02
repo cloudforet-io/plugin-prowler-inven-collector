@@ -315,5 +315,5 @@ class CloudServiceType(BaseCloudServiceType):
     metadata: dict = _METADATA
     labels: List[str] = ['Security', 'Compliance']
     tags: dict = {
-        'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/prowler.png'
+        'spaceone:icon': 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/prowler.svg'
     }
