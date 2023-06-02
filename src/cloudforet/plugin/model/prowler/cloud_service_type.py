@@ -236,8 +236,8 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'recommendation.description',
-                                'name': 'Recommendations'
+                                'key': 'remediation.description',
+                                'name': 'Remediation'
                             }
                         ],
                         'root_path': 'data.checks'
