@@ -162,9 +162,14 @@ _METADATA = {
                 'query': {
                     'aggregate': [
                         {
-                            'average': {
-                                'key': 'data.stats.score.percent',
-                                'name': 'value'
+                            'group': {
+                                'fields': [
+                                    {
+                                        'key': 'data.stats.score.percent',
+                                        'name': 'value',
+                                        'operator': 'average'
+                                    }
+                                ]
                             }
                         }
                     ],
