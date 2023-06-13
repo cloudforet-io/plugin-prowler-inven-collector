@@ -109,7 +109,6 @@ class AWSProwlerConnector(BaseConnector):
 
                     cmd += ['-M', 'json', '-o', temp_dir, '-F', 'output', '-z']
                     cmd += ['--compliance', compliance_type]
-                    cmd += ['-f', 'ap-northeast-2']
 
                     if role_arn:
                         cmd += ['--role', role_arn]
