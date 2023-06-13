@@ -1,4 +1,4 @@
-from cloudforet.plugin.model.plugin_info_model import PluginInfo, PluginMetadata, ResourceType
+from cloudforet.plugin.model.plugin_info_model import PluginInfo, PluginMetadata, ResourceType, ScheduleType, Feature
 
 SEVERITIES = {
     'Critical': 'critical',
@@ -118,8 +118,15 @@ class AWSPluginInfo(PluginInfo):
             ResourceType.cloud_service_type,
             ResourceType.region
         ],
+        'supported_schedules': [
+            ScheduleType.hours
+        ],
+        'supported_features': [
+            Feature.garbage_collection
+        ],
         'options_schema': {
             'required': ['provider', 'compliance_type'],
+            'order': ['provider', 'compliance_type'],
             'type': 'object',
             'properties': {
                 'provider': {
@@ -159,8 +166,15 @@ class GoogleCloudPluginInfo(PluginInfo):
             ResourceType.cloud_service_type,
             ResourceType.region
         ],
+        'supported_schedules': [
+            ScheduleType.hours
+        ],
+        'supported_features': [
+            Feature.garbage_collection
+        ],
         'options_schema': {
             'required': ['provider', 'compliance_type'],
+            'order': ['provider', 'compliance_type'],
             'type': 'object',
             'properties': {
                 'provider': {
@@ -200,8 +214,15 @@ class AzurePluginInfo(PluginInfo):
             ResourceType.cloud_service_type,
             ResourceType.region
         ],
+        'supported_schedules': [
+            ScheduleType.hours
+        ],
+        'supported_features': [
+            Feature.garbage_collection
+        ],
         'options_schema': {
             'required': ['provider', 'compliance_type'],
+            'order': ['provider', 'compliance_type'],
             'type': 'object',
             'properties': {
                 'provider': {
