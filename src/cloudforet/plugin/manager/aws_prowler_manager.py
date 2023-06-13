@@ -137,7 +137,10 @@ class AWSProwlerManager(CollectorManager):
         score_fail = stats['score']['fail']
         score_total = score_pass + score_fail
 
-        return round(score_pass / score_total * 100, 1)
+        if score_total == 0:
+            return 0
+        else:
+            return round(score_pass / score_total * 100, 1)
 
     @staticmethod
     def _make_compliance_display(compliance_data_stats):
