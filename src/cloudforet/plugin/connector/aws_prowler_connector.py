@@ -52,8 +52,8 @@ class AWSProfileManager:
 
         aws_profile.add_section(self.profile_name)
 
-        for key, value in self._credentials.items():
-            aws_profile.set(self.profile_name, key, value)
+        aws_profile.set(self.profile_name, 'aws_access_key_id', self._credentials['aws_access_key_id'])
+        aws_profile.set(self.profile_name, 'aws_secret_access_key', self._credentials['aws_secret_access_key'])
 
         with open(_AWS_PROFILE_PATH, 'w') as f:
             aws_profile.write(f)
@@ -97,6 +97,8 @@ class AWSProwlerConnector(BaseConnector):
 
     def check(self, options: dict, secret_data: dict, schema: str):
         self._check_secret_data(secret_data)
+        role_arn = secret_data.get('role_arn')
+        external_id = secret_data.get('external_id')
 
         compliance_type = COMPLIANCE_TYPES['aws'].get(options['compliance_type'])
 
@@ -108,6 +110,12 @@ class AWSProwlerConnector(BaseConnector):
                     cmd += ['-M', 'json', '-o', temp_dir, '-F', 'output', '-z']
                     cmd += ['--compliance', compliance_type]
                     cmd += ['-f', 'ap-northeast-2']
+
+                    if role_arn:
+                        cmd += ['--role', role_arn]
+
+                    if external_id:
+                        cmd += ['--external-id', external_id]
 
                     _LOGGER.debug(f'[check] command: {cmd}')
                     command.run(cmd)
