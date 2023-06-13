@@ -61,6 +61,7 @@ class AWSProwlerManager(CollectorManager):
                 compliance_id = f'{self.cloud_service_type}:{requirement_id}:{account}'
                 check_id = check_result['CheckID']
                 status = check_result['Status']
+                region_code = check_result['Region']
                 severity = _SEVERITY_MAP.get(check_result['Severity'], 'UNKNOWN')
                 score = _SEVERITY_SCORE_MAP[severity]
 
@@ -68,15 +69,17 @@ class AWSProwlerManager(CollectorManager):
                     compliance_results[compliance_id] = self._make_base_compliance_result(
                         compliance_id, requirement_id, severity, check_result)
 
+                check_exists = check_id in compliance_results[compliance_id]['data']['checks']
+
                 compliance_results[compliance_id]['data']['severity'] = self._update_severity(
                     compliance_results[compliance_id]['data']['severity'], severity)
 
                 compliance_results[compliance_id]['data'] = self._update_compliance_status_and_stats(
-                    compliance_results[compliance_id]['data'], status, score)
+                    compliance_results[compliance_id]['data'], status, score, check_exists)
 
                 compliance_results[compliance_id]['data']['findings'].append(self._make_finding(check_result))
 
-                if check_id not in compliance_results[compliance_id]['data']['checks']:
+                if not check_exists:
                     compliance_results[compliance_id]['data']['checks'][check_id] = self._make_check(check_result)
 
                 compliance_results[compliance_id]['data']['checks'][check_id] = self._update_check_status_and_stats(
@@ -202,20 +205,26 @@ class AWSProwlerManager(CollectorManager):
         return check
 
     @staticmethod
-    def _update_compliance_status_and_stats(compliance_result_data: dict, status: str, score: int) -> dict:
+    def _update_compliance_status_and_stats(compliance_result_data: dict, status: str, score: int,
+                                            check_exists: bool) -> dict:
         compliance_result_data['stats']['score']['total'] += score
-        compliance_result_data['stats']['checks']['total'] += 1
         compliance_result_data['stats']['findings']['total'] += 1
 
         if status == 'FAIL':
             compliance_result_data['status'] = 'FAIL'
             compliance_result_data['stats']['score']['fail'] += score
-            compliance_result_data['stats']['checks']['fail'] += 1
             compliance_result_data['stats']['findings']['fail'] += 1
         else:
             compliance_result_data['stats']['score']['pass'] += score
-            compliance_result_data['stats']['checks']['pass'] += 1
             compliance_result_data['stats']['findings']['pass'] += 1
+
+        if not check_exists:
+            compliance_result_data['stats']['checks']['total'] += 1
+            if status == 'FAIL':
+                compliance_result_data['stats']['checks']['fail'] += 1
+            else:
+                compliance_result_data['stats']['checks']['pass'] += 1
+
 
         return compliance_result_data
 
