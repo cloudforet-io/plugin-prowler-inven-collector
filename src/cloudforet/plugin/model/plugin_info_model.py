@@ -3,11 +3,6 @@ from pydantic import BaseModel
 from enum import Enum
 
 
-class UpgradeMode(str, Enum):
-    auto = 'AUTO'
-    manual = ' MANUAL'
-
-
 class ResourceType(str, Enum):
     cloud_service = 'inventory.CloudService'
     cloud_service_type = 'inventory.CloudServiceType'
@@ -25,10 +20,10 @@ class Feature(str, Enum):
 
 
 class PluginMetadata(BaseModel):
+    options_schema: dict
     supported_features: List[Feature] = [Feature.garbage_collection]
     supported_resource_type: List[ResourceType]
     supported_schedules: List[ScheduleType] = [ScheduleType.hours]
-    upgrade_mode: UpgradeMode = UpgradeMode.auto
 
 
 class PluginInfo(BaseModel):

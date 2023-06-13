@@ -5,16 +5,10 @@ from spaceone.core.error import *
 from spaceone.core.manager import BaseManager
 from cloudforet.plugin.model.plugin_info_model import PluginInfo, ResourceType
 from cloudforet.plugin.model.resource_info_model import ResourceInfo, State
+from cloudforet.plugin.model.prowler.collector import AWSPluginInfo, AzurePluginInfo, GoogleCloudPluginInfo
 from cloudforet.plugin.connector.aws_prowler_connector import AWSProwlerConnector
 
 _LOGGER = logging.getLogger(__name__)
-_PLUGIN_METADATA = {
-    'supported_resource_type': [
-        ResourceType.cloud_service,
-        ResourceType.cloud_service_type,
-        ResourceType.region
-    ]
-}
 
 
 class CollectorManager(BaseManager):
@@ -29,8 +23,20 @@ class CollectorManager(BaseManager):
 
     @staticmethod
     def init_response(options: dict) -> dict:
-        response = PluginInfo(metadata=_PLUGIN_METADATA)
-        return response.dict()
+        if provider := options.get('provider'):
+            if provider == 'aws':
+                response = AWSPluginInfo()
+                return response.dict()
+            elif provider == 'azure':
+                response = AzurePluginInfo()
+                return response.dict()
+            elif provider == 'google_cloud':
+                response = GoogleCloudPluginInfo()
+                return response.dict()
+            else:
+                raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider')
+        else:
+            raise ERROR_REQUIRED_PARAMETER(key='options.provider')
 
     def verify_client(self, options: dict, secret_data: dict, schema: str) -> None:
         self.aws_prowler_connector.verify_client(options, secret_data, schema)
