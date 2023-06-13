@@ -71,6 +71,9 @@ class AWSProwlerManager(CollectorManager):
 
                 check_exists = check_id in compliance_results[compliance_id]['data']['checks']
 
+                if compliance_results[compliance_id]['region_code'] != region_code:
+                    compliance_results[compliance_id]['region_code'] = self.region_name
+
                 compliance_results[compliance_id]['data']['severity'] = self._update_severity(
                     compliance_results[compliance_id]['data']['severity'], severity)
 
@@ -286,7 +289,7 @@ class AWSProwlerManager(CollectorManager):
             'provider': self.provider,
             'cloud_service_group': self.cloud_service_group,
             'cloud_service_type': self.cloud_service_type,
-            'region_code': self.region_name
+            'region_code': check_result['Region']
         }
 
         return compliance_result
