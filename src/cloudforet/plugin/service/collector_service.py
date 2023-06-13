@@ -16,7 +16,7 @@ class CollectorService(BaseService):
         super().__init__(*args, **kwargs)
 
     @transaction
-    @check_required(['options'])
+    @check_required(['options', 'options.provider'])
     def init(self, params):
         """ init plugin by options
 
@@ -36,7 +36,7 @@ class CollectorService(BaseService):
         return collector_mgr.init_response(options)
 
     @transaction
-    @check_required(['options', 'secret_data'])
+    @check_required(['options', 'options.provider', 'secret_data'])
     def verify(self, params):
         """ Verifying collector plugin
 
@@ -61,7 +61,7 @@ class CollectorService(BaseService):
         collector_mgr.verify_client(options, secret_data, schema)
 
     @transaction
-    @check_required(['options', 'secret_data'])
+    @check_required(['options', 'options.provider', 'secret_data'])
     def collect(self, params):
         """ Collect external data
 
@@ -78,11 +78,22 @@ class CollectorService(BaseService):
         """
 
         options = params['options']
+        provider = params['options'].get('provider')
         secret_data = params['secret_data']
         schema = params.get('schema')
 
-        collector_mgr: AWSProwlerManager = self.locator.get_manager(AWSProwlerManager)
+        collector_mgr: CollectorManager = self._get_collector_manager_from_provider(provider)
         iterator = collector_mgr.collect(options, secret_data, schema)
 
         for resource_data in iterator:
             yield resource_data
+
+    def _get_collector_manager_from_provider(self, provider):
+        if provider == 'aws':
+            return self.locator.get_manager(AWSProwlerManager)
+        elif provider == 'azure':
+            return self.locator.get_manager(AWSProwlerManager)
+        elif provider == 'google_cloud':
+            return self.locator.get_manager(AWSProwlerManager)
+        else:
+            raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider')

@@ -12,6 +12,7 @@ _SEVERITY_MAP = {
     'high': 'HIGH',
     'medium': 'MEDIUM',
     'low': 'LOW',
+    'informational': 'INFORMATIONAL',
 }
 
 _SEVERITY_SCORE_MAP = {
@@ -19,6 +20,7 @@ _SEVERITY_SCORE_MAP = {
     'HIGH': 3,
     'MEDIUM': 2,
     'LOW': 1,
+    'INFORMATIONAL': 0,
     'UNKNOWN': 1
 }
 

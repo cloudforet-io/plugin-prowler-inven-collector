@@ -3,7 +3,7 @@ from typing import Generator
 
 from spaceone.core.error import *
 from spaceone.core.manager import BaseManager
-from cloudforet.plugin.model.plugin_info_model import PluginInfo, ResourceType
+from cloudforet.plugin.model.plugin_info_model import ResourceType
 from cloudforet.plugin.model.resource_info_model import ResourceInfo, State
 from cloudforet.plugin.model.prowler.collector import AWSPluginInfo, AzurePluginInfo, GoogleCloudPluginInfo
 from cloudforet.plugin.connector.aws_prowler_connector import AWSProwlerConnector
@@ -23,23 +23,29 @@ class CollectorManager(BaseManager):
 
     @staticmethod
     def init_response(options: dict) -> dict:
-        if provider := options.get('provider'):
-            if provider == 'aws':
-                response = AWSPluginInfo()
-                return response.dict()
-            elif provider == 'azure':
-                response = AzurePluginInfo()
-                return response.dict()
-            elif provider == 'google_cloud':
-                response = GoogleCloudPluginInfo()
-                return response.dict()
-            else:
-                raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider')
+        provider = options.get('provider')
+        if provider == 'aws':
+            response = AWSPluginInfo()
+            return response.dict()
+        elif provider == 'azure':
+            response = AzurePluginInfo()
+            return response.dict()
+        elif provider == 'google_cloud':
+            response = GoogleCloudPluginInfo()
+            return response.dict()
         else:
-            raise ERROR_REQUIRED_PARAMETER(key='options.provider')
+            raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider')
 
     def verify_client(self, options: dict, secret_data: dict, schema: str) -> None:
-        self.aws_prowler_connector.verify_client(options, secret_data, schema)
+        provider = options.get('provider')
+        if provider == 'aws':
+            self.aws_prowler_connector.verify_client(options, secret_data, schema)
+        elif provider == 'azure':
+            pass
+        elif provider == 'google_cloud':
+            pass
+        else:
+            raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider')
 
     def collect(self, options: dict, secret_data: dict, schema: str) -> Generator[dict, None, None]:
         raise NotImplementedError('Method not implemented!')
