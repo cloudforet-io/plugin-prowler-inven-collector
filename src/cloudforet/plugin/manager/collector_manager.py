@@ -34,7 +34,7 @@ class CollectorManager(BaseManager):
             response = GoogleCloudPluginInfo()
             return response.dict()
         else:
-            raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider')
+            raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider.')
 
     def verify_client(self, options: dict, secret_data: dict, schema: str) -> None:
         provider = options.get('provider')
@@ -45,7 +45,7 @@ class CollectorManager(BaseManager):
         elif provider == 'google_cloud':
             pass
         else:
-            raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider')
+            raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider.')
 
     def collect(self, options: dict, secret_data: dict, schema: str) -> Generator[dict, None, None]:
         raise NotImplementedError('Method not implemented!')

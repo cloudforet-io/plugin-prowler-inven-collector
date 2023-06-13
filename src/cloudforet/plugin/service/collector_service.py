@@ -61,7 +61,7 @@ class CollectorService(BaseService):
         collector_mgr.verify_client(options, secret_data, schema)
 
     @transaction
-    @check_required(['options', 'options.provider', 'secret_data'])
+    @check_required(['options', 'options.provider', 'options.compliance_type', 'secret_data'])
     def collect(self, params):
         """ Collect external data
 
@@ -83,7 +83,7 @@ class CollectorService(BaseService):
         schema = params.get('schema')
 
         collector_mgr: CollectorManager = self._get_collector_manager_from_provider(provider)
-        iterator = collector_mgr.collect(options, secret_data, schema)
+        iterator: Generator = collector_mgr.collect(options, secret_data, schema)
 
         for resource_data in iterator:
             yield resource_data

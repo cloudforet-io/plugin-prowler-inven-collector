@@ -16,20 +16,20 @@ COMPLIANCE_TYPES = {
         'SOC2': 'soc2_aws',
         'GDPR': 'gdpr_aws',
         'HIPAA': 'hipaa_aws',
-        'AWS-FSBP': 'aws_foundational_security_best_practices_aws',
+        'AWS-Foundational-Security-Best-Practices': 'aws_foundational_security_best_practices_aws',
         'GxP-21-CFR-Part-11': 'gxp_21_cfr_part_11_aws',
         'GxP-EU-Annex-11': 'gxp_eu_annex_11_aws',
-        'NIST-800-171-R2': 'nist_800_171_revision_2_aws',
-        'NIST-800-53-R4': 'nist_800_53_revision_4_aws',
-        'NIST-800-53-R5': 'nist_800_53_revision_5_aws',
-        'ENS-2022-RD': 'ens_rd2022_aws',
+        'NIST-800-171-Revision-2': 'nist_800_171_revision_2_aws',
+        'NIST-800-53-Revision-4': 'nist_800_53_revision_4_aws',
+        'NIST-800-53-Revision-5': 'nist_800_53_revision_5_aws',
+        'ENS-RD2022': 'ens_rd2022_aws',
         'NIST-CSF-1.1': 'nist_csf_1.1_aws',
-        'AWS-CT-Guardrails': 'aws_audit_manager_control_tower_guardrails_aws',
-        'RBI-CSF': 'rbi_cyber_security_framework_aws',
+        'AWS-Audit-Manager-Control-Tower-Guardrails': 'aws_audit_manager_control_tower_guardrails_aws',
+        'RBI-Cyber-Security-Framework': 'rbi_cyber_security_framework_aws',
         'FFIEC': 'ffiec_aws',
         'PCI-3.2.1': 'pci_3.2.1_aws',
-        'FedRAMP-Moderate-R4': 'fedramp_moderate_revision_4_aws',
-        'FedRAMP-Low-R4': 'fedramp_low_revision_4_aws',
+        'FedRamp-Moderate-Revision-4': 'fedramp_moderate_revision_4_aws',
+        'FedRAMP-Low-Revision-4': 'fedramp_low_revision_4_aws',
     },
     'google_cloud': {
         'Google-Cloud-Standard': '',
@@ -133,20 +133,20 @@ class AWSPluginInfo(PluginInfo):
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['aws'].keys()),
                 },
-                'service': {
-                    'title': 'Service',
-                    'type': 'array',
-                    'items': {
-                        'enum': list(SERVICES['aws'].keys())
-                    }
-                },
-                'severity': {
-                    'title': 'Severity',
-                    'type': 'array',
-                    'items': {
-                        'enum': list(SEVERITIES.keys())
-                    }
-                }
+                # 'services': {
+                #     'title': 'Service',
+                #     'type': 'array',
+                #     'items': {
+                #         'enum': list(SERVICES['aws'].keys())
+                #     }
+                # },
+                # 'severity': {
+                #     'title': 'Severity',
+                #     'type': 'array',
+                #     'items': {
+                #         'enum': list(SEVERITIES.keys())
+                #     }
+                # }
             }
         }
     }
@@ -174,20 +174,20 @@ class GoogleCloudPluginInfo(PluginInfo):
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['google_cloud'].keys()),
                 },
-                'service': {
-                    'title': 'Service',
-                    'type': 'array',
-                    'items': {
-                        'enum': list(SERVICES['google_cloud'].keys())
-                    }
-                },
-                'severity': {
-                    'title': 'Severity',
-                    'type': 'array',
-                    'items': {
-                        'enum': list(SEVERITIES.keys())
-                    }
-                }
+                # 'services': {
+                #     'title': 'Service',
+                #     'type': 'array',
+                #     'items': {
+                #         'enum': list(SERVICES['google_cloud'].keys())
+                #     }
+                # },
+                # 'severity': {
+                #     'title': 'Severity',
+                #     'type': 'array',
+                #     'items': {
+                #         'enum': list(SEVERITIES.keys())
+                #     }
+                # }
             }
         }
     }
@@ -215,20 +215,20 @@ class AzurePluginInfo(PluginInfo):
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['azure'].keys()),
                 },
-                'service': {
-                    'title': 'Service',
-                    'type': 'array',
-                    'items': {
-                        'enum': list(SERVICES['azure'].keys())
-                    }
-                },
-                'severity': {
-                    'title': 'Severity',
-                    'type': 'array',
-                    'items': {
-                        'enum': list(SEVERITIES.keys())
-                    }
-                }
+                # 'services': {
+                #     'title': 'Service',
+                #     'type': 'array',
+                #     'items': {
+                #         'enum': list(SERVICES['azure'].keys())
+                #     }
+                # },
+                # 'severity': {
+                #     'title': 'Severity',
+                #     'type': 'array',
+                #     'items': {
+                #         'enum': list(SEVERITIES.keys())
+                #     }
+                # }
             }
         }
     }

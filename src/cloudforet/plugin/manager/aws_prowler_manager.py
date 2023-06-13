@@ -1,9 +1,13 @@
+import time
+import random
 import logging
 from typing import Generator, List
 
+from cloudforet.plugin.error.custom import *
 from cloudforet.plugin.manager.collector_manager import CollectorManager
 from cloudforet.plugin.connector.aws_prowler_connector import AWSProwlerConnector
 from cloudforet.plugin.model.prowler.cloud_service_type import CloudServiceType
+from cloudforet.plugin.model.prowler.collector import COMPLIANCE_TYPES
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,10 +36,14 @@ class AWSProwlerManager(CollectorManager):
         self.aws_prowler_connector: AWSProwlerConnector = self.locator.get_connector(AWSProwlerConnector)
         self.provider = 'aws'
         self.cloud_service_group = 'Prowler'
-        self.cloud_service_type = 'CIS-1.5'
-        self.region_name = 'global'
+        self.cloud_service_type = None
 
     def collect(self, options: dict, secret_data: dict, schema: str) -> Generator[dict, None, None]:
+        self.cloud_service_type = options['compliance_type']
+        self._check_compliance_type()
+
+        self._wait_random_time()
+
         try:
             check_results = self.aws_prowler_connector.check(options, secret_data, schema)
             compliance_results = self.make_compliance_results(check_results)
@@ -58,6 +66,7 @@ class AWSProwlerManager(CollectorManager):
         compliance_results = {}
         for check_result in check_results:
             account = check_result['AccountId']
+            print(check_result.get('Compliance', {}))
             requirements = check_result.get('Compliance', {}).get(self.cloud_service_type, [])
             for requirement_id in requirements:
                 compliance_id = f'{self.cloud_service_type}:{requirement_id}:{account}'
@@ -74,7 +83,7 @@ class AWSProwlerManager(CollectorManager):
                 check_exists = check_id in compliance_results[compliance_id]['data']['checks']
 
                 if compliance_results[compliance_id]['region_code'] != region_code:
-                    compliance_results[compliance_id]['region_code'] = self.region_name
+                    compliance_results[compliance_id]['region_code'] = 'global'
 
                 compliance_results[compliance_id]['data']['severity'] = self._update_severity(
                     compliance_results[compliance_id]['data']['severity'], severity)
@@ -167,7 +176,8 @@ class AWSProwlerManager(CollectorManager):
                 'findings': {
                     'total': 0,
                     'pass': 0,
-                    'fail': 0
+                    'fail': 0,
+                    'info': 0,
                 }
             }
         }
@@ -203,6 +213,10 @@ class AWSProwlerManager(CollectorManager):
             check['status'] = 'FAIL'
             check['stats']['score']['fail'] += score
             check['stats']['findings']['fail'] += 1
+        elif status == 'INFO':
+            if check['status'] != 'FAIL':
+                check['status'] = 'INFO'
+            check['stats']['findings']['info'] += 1
         else:
             check['stats']['score']['pass'] += score
             check['stats']['findings']['pass'] += 1
@@ -219,6 +233,10 @@ class AWSProwlerManager(CollectorManager):
             compliance_result_data['status'] = 'FAIL'
             compliance_result_data['stats']['score']['fail'] += score
             compliance_result_data['stats']['findings']['fail'] += 1
+        elif status == 'INFO':
+            if compliance_result_data['status'] != 'FAIL':
+                compliance_result_data['status'] = 'INFO'
+            compliance_result_data['stats']['findings']['info'] += 1
         else:
             compliance_result_data['stats']['score']['pass'] += score
             compliance_result_data['stats']['findings']['pass'] += 1
@@ -227,9 +245,10 @@ class AWSProwlerManager(CollectorManager):
             compliance_result_data['stats']['checks']['total'] += 1
             if status == 'FAIL':
                 compliance_result_data['stats']['checks']['fail'] += 1
-            else:
+            elif status == 'PASS':
                 compliance_result_data['stats']['checks']['pass'] += 1
-
+            else:
+                compliance_result_data['stats']['checks']['info'] += 1
 
         return compliance_result_data
 
@@ -264,12 +283,14 @@ class AWSProwlerManager(CollectorManager):
                     'checks': {
                         'total': 0,
                         'pass': 0,
-                        'fail': 0
+                        'fail': 0,
+                        'info': 0,
                     },
                     'findings': {
                         'total': 0,
                         'pass': 0,
-                        'fail': 0
+                        'fail': 0,
+                        'info': 0,
                     }
                 }
             },
@@ -295,3 +316,16 @@ class AWSProwlerManager(CollectorManager):
         }
 
         return compliance_result
+
+    @staticmethod
+    def _wait_random_time():
+        random_time = round(random.uniform(0, 5), 2)
+        _LOGGER.debug(f'[_wait_random_time] sleep time: {random_time}')
+
+        time.sleep(random_time)
+
+    def _check_compliance_type(self):
+        all_compliance_types = list(COMPLIANCE_TYPES['aws'].keys())
+        if self.cloud_service_type not in all_compliance_types:
+            raise ERROR_INVALID_PARAMETER(key='options.compliance_type',
+                                          reason=f'Not supported compliance type. (compliance_types = {all_compliance_types})')
