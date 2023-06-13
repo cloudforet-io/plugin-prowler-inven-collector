@@ -66,7 +66,6 @@ class AWSProwlerManager(CollectorManager):
         compliance_results = {}
         for check_result in check_results:
             account = check_result['AccountId']
-            print(check_result.get('Compliance', {}))
             requirements = check_result.get('Compliance', {}).get(self.cloud_service_type, [])
             for requirement_id in requirements:
                 compliance_id = f'{self.cloud_service_type}:{requirement_id}:{account}'
