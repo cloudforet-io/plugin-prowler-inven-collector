@@ -133,15 +133,15 @@ class AWSPluginInfo(PluginInfo):
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['aws'].keys()),
                 },
-                'services': {
-                    'title': 'Services',
+                'service': {
+                    'title': 'Service',
                     'type': 'array',
                     'items': {
                         'enum': list(SERVICES['aws'].keys())
                     }
                 },
-                'severities': {
-                    'title': 'Severities',
+                'severity': {
+                    'title': 'Severity',
                     'type': 'array',
                     'items': {
                         'enum': list(SEVERITIES.keys())
@@ -174,15 +174,15 @@ class GoogleCloudPluginInfo(PluginInfo):
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['google_cloud'].keys()),
                 },
-                'services': {
-                    'title': 'Services',
+                'service': {
+                    'title': 'Service',
                     'type': 'array',
                     'items': {
                         'enum': list(SERVICES['google_cloud'].keys())
                     }
                 },
-                'severities': {
-                    'title': 'Severities',
+                'severity': {
+                    'title': 'Severity',
                     'type': 'array',
                     'items': {
                         'enum': list(SEVERITIES.keys())
@@ -215,15 +215,15 @@ class AzurePluginInfo(PluginInfo):
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['azure'].keys()),
                 },
-                'services': {
-                    'title': 'Services',
+                'service': {
+                    'title': 'Service',
                     'type': 'array',
                     'items': {
                         'enum': list(SERVICES['azure'].keys())
                     }
                 },
-                'severities': {
-                    'title': 'Severities',
+                'severity': {
+                    'title': 'Severity',
                     'type': 'array',
                     'items': {
                         'enum': list(SEVERITIES.keys())
