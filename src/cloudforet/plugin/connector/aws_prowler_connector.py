@@ -99,6 +99,7 @@ class AWSProwlerConnector(BaseConnector):
         self._check_secret_data(secret_data)
         role_arn = secret_data.get('role_arn')
         external_id = secret_data.get('external_id')
+        regions = options.get('regions', [])
 
         compliance_type = COMPLIANCE_TYPES['aws'].get(options['compliance_type'])
 
@@ -109,6 +110,10 @@ class AWSProwlerConnector(BaseConnector):
 
                     cmd += ['-M', 'json', '-o', temp_dir, '-F', 'output', '-z']
                     cmd += ['--compliance', compliance_type]
+
+                    if regions:
+                        region_filter = ['-f'] + regions
+                        cmd += region_filter
 
                     if role_arn:
                         cmd += ['--role', role_arn]
