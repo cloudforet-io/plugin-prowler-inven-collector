@@ -125,7 +125,7 @@ class AWSPluginInfo(PluginInfo):
                 'provider': {
                     'title': 'Provider',
                     'type': 'string',
-                    'default': 'google_cloud',
+                    'default': 'aws',
                     'disabled': True
                 },
                 'compliance_type': {
@@ -207,7 +207,7 @@ class AzurePluginInfo(PluginInfo):
                 'provider': {
                     'title': 'Provider',
                     'type': 'string',
-                    'default': 'google_cloud',
+                    'default': 'azure',
                     'disabled': True
                 },
                 'compliance_type': {

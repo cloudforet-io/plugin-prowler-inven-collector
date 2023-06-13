@@ -134,7 +134,8 @@ class AWSProwlerManager(CollectorManager):
     @staticmethod
     def _calculate_score(stats):
         score_pass = stats['score']['pass']
-        score_total = stats['score']['total']
+        score_fail = stats['score']['fail']
+        score_total = score_pass + score_fail
 
         return round(score_pass / score_total * 100, 1)
 
@@ -170,7 +171,6 @@ class AWSProwlerManager(CollectorManager):
             'remediation': self._make_remediation(check_result['Remediation']),
             'stats': {
                 'score': {
-                    'total': 0,
                     'pass': 0,
                     'fail': 0,
                     'percent': 0
@@ -208,7 +208,6 @@ class AWSProwlerManager(CollectorManager):
 
     @staticmethod
     def _update_check_status_and_stats(check: dict, status: str, score: int) -> dict:
-        check['stats']['score']['total'] += score
         check['stats']['findings']['total'] += 1
 
         if status == 'FAIL':
@@ -228,7 +227,6 @@ class AWSProwlerManager(CollectorManager):
     @staticmethod
     def _update_compliance_status_and_stats(compliance_result_data: dict, status: str, score: int,
                                             check_exists: bool) -> dict:
-        compliance_result_data['stats']['score']['total'] += score
         compliance_result_data['stats']['findings']['total'] += 1
 
         if status == 'FAIL':
@@ -238,6 +236,7 @@ class AWSProwlerManager(CollectorManager):
         elif status == 'INFO':
             if compliance_result_data['status'] != 'FAIL':
                 compliance_result_data['status'] = 'INFO'
+
             compliance_result_data['stats']['findings']['info'] += 1
         else:
             compliance_result_data['stats']['score']['pass'] += score
@@ -277,7 +276,6 @@ class AWSProwlerManager(CollectorManager):
                 },
                 'stats': {
                     'score': {
-                        'total': 0,
                         'pass': 0,
                         'fail': 0,
                         'percent': 0

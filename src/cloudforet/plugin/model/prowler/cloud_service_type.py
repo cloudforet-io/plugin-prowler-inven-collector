@@ -2,6 +2,55 @@ from typing import List
 from cloudforet.plugin.model.cloud_service_type_model import BaseCloudServiceType
 
 _METADATA = {
+    'query_sets': [
+        {
+            'name': 'Prowler Status',
+            'query_options': {
+                'group_by': [
+                    'data.status',
+                    'data.severity',
+                    'data.service'
+                ],
+                'fields': {
+                    'compliance_count': {
+                        'operator': 'count'
+                    },
+                    'fail_check_count': {
+                        'key': 'data.stats.checks.fail',
+                        'operator': 'sum'
+                    },
+                    'pass_check_count': {
+                        'key': 'data.stats.checks.pass',
+                        'operator': 'sum'
+                    },
+                    'info_check_count': {
+                        'key': 'data.stats.checks.info',
+                        'operator': 'sum'
+                    },
+                    'fail_finding_count': {
+                        'key': 'data.stats.findings.fail',
+                        'operator': 'sum'
+                    },
+                    'pass_finding_count': {
+                        'key': 'data.stats.findings.pass',
+                        'operator': 'sum'
+                    },
+                    'info_finding_count': {
+                        'key': 'data.stats.findings.info',
+                        'operator': 'sum'
+                    },
+                    'fail_score': {
+                        'key': 'data.stats.score.fail',
+                        'operator': 'sum'
+                    },
+                    'pass_score': {
+                        'key': 'data.stats.score.pass',
+                        'operator': 'sum'
+                    }
+                }
+            }
+        }
+    ],
     'view': {
         'search': [
             {
