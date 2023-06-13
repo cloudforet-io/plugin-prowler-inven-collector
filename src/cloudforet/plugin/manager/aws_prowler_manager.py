@@ -2,6 +2,7 @@ import time
 import random
 import logging
 from typing import Generator, List
+from prowler.lib.check.check import bulk_load_compliance_frameworks
 
 from cloudforet.plugin.error.custom import *
 from cloudforet.plugin.manager.collector_manager import CollectorManager
@@ -37,10 +38,12 @@ class AWSProwlerManager(CollectorManager):
         self.provider = 'aws'
         self.cloud_service_group = 'Prowler'
         self.cloud_service_type = None
+        self.compliance_type_info = {}
 
     def collect(self, options: dict, secret_data: dict, schema: str) -> Generator[dict, None, None]:
         self.cloud_service_type = options['compliance_type']
         self._check_compliance_type()
+        self._load_compliance_type_info()
 
         self._wait_random_time()
 
@@ -254,13 +257,13 @@ class AWSProwlerManager(CollectorManager):
     def _make_base_compliance_result(self, compliance_id: str, requirement_id: str, severity: str,
                                      check_result: dict) -> dict:
         compliance_result = {
-            'name': check_result['Description'],
+            'name': self.compliance_type_info[requirement_id],
             'reference': {
                 'resource_id': compliance_id,
             },
             'data': {
                 'requirement_id': requirement_id,
-                # 'description': check_result['Description'],
+                'description': check_result['Description'],
                 'status': 'PASS',
                 'severity': severity,
                 'service': check_result['ServiceName'],
@@ -328,3 +331,9 @@ class AWSProwlerManager(CollectorManager):
         if self.cloud_service_type not in all_compliance_types:
             raise ERROR_INVALID_PARAMETER(key='options.compliance_type',
                                           reason=f'Not supported compliance type. (compliance_types = {all_compliance_types})')
+
+    def _load_compliance_type_info(self):
+        compliance_type = COMPLIANCE_TYPES['aws'][self.cloud_service_type]
+        compliance_frameworks = bulk_load_compliance_frameworks(self.provider)
+        for requirement in compliance_frameworks[compliance_type].Requirements:
+            self.compliance_type_info[requirement.Id] = requirement.Description

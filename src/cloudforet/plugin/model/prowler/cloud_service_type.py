@@ -5,10 +5,6 @@ _METADATA = {
     'view': {
         'search': [
             {
-                'key': 'data.description',
-                'name': 'Description'
-            },
-            {
                 'key': 'data.requirement_id',
                 'name': 'Requirement ID'
             },
@@ -40,6 +36,11 @@ _METADATA = {
                             'type': 'text',
                             'key': 'data.requirement_id',
                             'name': 'Requirement ID'
+                        },
+                        {
+                            'type': 'text',
+                            'key': 'data.description',
+                            'name': 'Description'
                         },
                         {
                             'type': 'enum',
