@@ -119,8 +119,15 @@ class AWSPluginInfo(PluginInfo):
             ResourceType.region
         ],
         'options_schema': {
+            'required': ['provider', 'compliance_type'],
             'type': 'object',
             'properties': {
+                'provider': {
+                    'title': 'Provider',
+                    'type': 'string',
+                    'default': 'google_cloud',
+                    'disabled': True
+                },
                 'compliance_type': {
                     'title': 'Compliance Type',
                     'type': 'string',
@@ -153,8 +160,15 @@ class GoogleCloudPluginInfo(PluginInfo):
             ResourceType.region
         ],
         'options_schema': {
+            'required': ['provider', 'compliance_type'],
             'type': 'object',
             'properties': {
+                'provider': {
+                    'title': 'Provider',
+                    'type': 'string',
+                    'default': 'google_cloud',
+                    'disabled': True
+                },
                 'compliance_type': {
                     'title': 'Compliance Type',
                     'type': 'string',
@@ -187,8 +201,15 @@ class AzurePluginInfo(PluginInfo):
             ResourceType.region
         ],
         'options_schema': {
+            'required': ['provider', 'compliance_type'],
             'type': 'object',
             'properties': {
+                'provider': {
+                    'title': 'Provider',
+                    'type': 'string',
+                    'default': 'google_cloud',
+                    'disabled': True
+                },
                 'compliance_type': {
                     'title': 'Compliance Type',
                     'type': 'string',
