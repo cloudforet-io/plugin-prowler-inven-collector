@@ -89,7 +89,10 @@ _METADATA = {
                         {
                             'type': 'text',
                             'key': 'data.description',
-                            'name': 'Description'
+                            'name': 'Description',
+                            'options': {
+                                'is_optional': True
+                            }
                         },
                         {
                             'type': 'enum',
@@ -106,6 +109,12 @@ _METADATA = {
                                     'type': 'badge',
                                     'options': {
                                         'background_color': 'indigo.500'
+                                    }
+                                },
+                                'INFO': {
+                                    'type': 'badge',
+                                    'options': {
+                                        'background_color': 'peacock.500'
                                     }
                                 }
                             }
@@ -166,10 +175,7 @@ _METADATA = {
                             }
                         }
                     ],
-                    'filter': [
-                        # {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
-                        # {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
-                    ]
+                    'filter': []
                 }
             },
             {
@@ -192,43 +198,38 @@ _METADATA = {
                         }
                     ],
                     'filter': [
-                        # {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
-                        # {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
                         {'key': 'data.status', 'value': 'FAIL', 'operator': 'eq'}
                     ]
                 }
             },
-            {
-                'name': 'Compliance Score',
-                'type': 'summary',
-                'options': {
-                    'value_options': {
-                        'key': 'value',
-                        'options': {
-                            'default': 0
-                        }
-                    }
-                },
-                'query': {
-                    'aggregate': [
-                        {
-                            'group': {
-                                'fields': [
-                                    {
-                                        'key': 'data.stats.score.percent',
-                                        'name': 'value',
-                                        'operator': 'average'
-                                    }
-                                ]
-                            }
-                        }
-                    ],
-                    'filter': [
-                        # {'key': 'provider', 'value': 'aws', 'operator': 'eq'},
-                        # {'key': 'cloud_service_group', 'value': 'Prowler', 'operator': 'eq'},
-                    ]
-                }
-            },
+            # {
+            #     'name': 'Compliance Score',
+            #     'type': 'summary',
+            #     'options': {
+            #         'value_options': {
+            #             'key': 'value',
+            #             'options': {
+            #                 'default': 0
+            #             }
+            #         }
+            #     },
+            #     'query': {
+            #         'aggregate': [
+            #             {
+            #                 'group': {
+            #                     'fields': [
+            #                         {
+            #                             'key': 'data.stats.score.percent',
+            #                             'name': 'value',
+            #                             'operator': 'average'
+            #                         }
+            #                     ]
+            #                 }
+            #             }
+            #         ],
+            #         'filter': []
+            #     }
+            # },
         ],
         'sub_data': {
             'layouts': [
@@ -257,6 +258,12 @@ _METADATA = {
                                         'type': 'badge',
                                         'options': {
                                             'background_color': 'indigo.500'
+                                        }
+                                    },
+                                    'INFO': {
+                                        'type': 'badge',
+                                        'options': {
+                                            'background_color': 'peacock.500'
                                         }
                                     }
                                 }
