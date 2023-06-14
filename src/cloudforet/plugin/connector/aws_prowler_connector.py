@@ -2,7 +2,7 @@ import os
 import logging
 import tempfile
 import configparser
-import command
+import subprocess
 from typing import List
 
 from spaceone.core import utils
@@ -93,7 +93,9 @@ class AWSProwlerConnector(BaseConnector):
                 cmd = self._command_prefix(aws_profile.profile_name)
                 cmd += ['-l']
                 _LOGGER.debug(f'[verify_client] command: {cmd}')
-                command.run(cmd)
+                response = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+                if response.returncode != 0:
+                    raise ERROR_PROWLER_EXECUTION_FAILED(reason=response.stderr.decode('utf-8'))
 
     def check(self, options: dict, secret_data: dict, schema: str):
         self._check_secret_data(secret_data)
@@ -103,32 +105,33 @@ class AWSProwlerConnector(BaseConnector):
 
         compliance_type = COMPLIANCE_TYPES['aws'].get(options['compliance_type'])
 
-        try:
-            with tempfile.TemporaryDirectory() as temp_dir:
-                with AWSProfileManager(secret_data) as aws_profile:
-                    cmd = self._command_prefix(aws_profile.profile_name)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with AWSProfileManager(secret_data) as aws_profile:
+                cmd = self._command_prefix(aws_profile.profile_name)
 
-                    cmd += ['-M', 'json', '-o', temp_dir, '-F', 'output', '-z']
-                    cmd += ['--compliance', compliance_type]
+                cmd += ['-M', 'json', '-o', temp_dir, '-F', 'output', '-z']
+                cmd += ['--compliance', compliance_type]
 
-                    if regions:
-                        region_filter = ['-f'] + regions
-                        cmd += region_filter
+                if regions:
+                    region_filter = ['-f'] + regions
+                    cmd += region_filter
 
-                    if role_arn:
-                        cmd += ['--role', role_arn]
+                if role_arn:
+                    cmd += ['--role', role_arn]
 
-                    if external_id:
-                        cmd += ['--external-id', external_id]
+                if external_id:
+                    cmd += ['--external-id', external_id]
 
-                    _LOGGER.debug(f'[check] command: {cmd}')
-                    command.run(cmd)
+                _LOGGER.debug(f'[check] command: {cmd}')
 
-                    output_json_file = os.path.join(temp_dir, 'output.json')
-                    check_results = utils.load_json_from_file(output_json_file)
-                    return check_results
-        except Exception as e:
-            raise ERROR_PROWLER_EXECUTION_FAILED(reason=e)
+                response = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+                if response.returncode != 0:
+                    raise ERROR_PROWLER_EXECUTION_FAILED(reason=response.stderr.decode('utf-8'))
+
+                output_json_file = os.path.join(temp_dir, 'output.json')
+                check_results = utils.load_json_from_file(output_json_file)
+                return check_results
+
 
     @staticmethod
     def _check_secret_data(secret_data: dict):

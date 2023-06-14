@@ -48,6 +48,8 @@ class AWSProwlerManager(CollectorManager):
         self._wait_random_time()
 
         try:
+            check_results = self.aws_prowler_connector.check(options, secret_data, schema)
+
             # Return Cloud Service Type
             cloud_service_type = CloudServiceType(name=self.cloud_service_type, provider=self.provider)
             yield self.make_response(cloud_service_type.dict(),
@@ -55,7 +57,6 @@ class AWSProwlerManager(CollectorManager):
                                      resource_type='inventory.CloudServiceType')
 
             # Return compliance results (Cloud Services)
-            check_results = self.aws_prowler_connector.check(options, secret_data, schema)
             for compliance_result in self.make_compliance_results(check_results):
                 yield self.make_response(compliance_result, {'1': [
                     'reference.resource_id', 'provider', 'cloud_service_type', 'cloud_service_group', 'account']})
