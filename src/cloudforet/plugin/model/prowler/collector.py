@@ -175,6 +175,7 @@ class AWSPluginInfo(PluginInfo):
                     'title': 'Compliance Type',
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['aws'].keys()),
+                    'default': 'CIS-1.5'
                 },
                 'regions': {
                     'title': 'Region',
@@ -230,6 +231,7 @@ class GoogleCloudPluginInfo(PluginInfo):
                     'title': 'Compliance Type',
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['google_cloud'].keys()),
+                    'default': 'Google-Cloud-Standard'
                 },
                 # 'services': {
                 #     'title': 'Service',
@@ -278,6 +280,7 @@ class AzurePluginInfo(PluginInfo):
                     'title': 'Compliance Type',
                     'type': 'string',
                     'enum': list(COMPLIANCE_TYPES['azure'].keys()),
+                    'default': 'Azure-Standard'
                 },
                 # 'services': {
                 #     'title': 'Service',
