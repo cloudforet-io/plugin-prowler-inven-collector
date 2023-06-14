@@ -12,9 +12,6 @@ _LOGGER = logging.getLogger(__name__)
 
 class CollectorService(BaseService):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @transaction
     @check_required(['options', 'options.provider'])
     def init(self, params):
