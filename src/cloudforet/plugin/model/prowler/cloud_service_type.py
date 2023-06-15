@@ -291,18 +291,16 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'audit',
-                                'name': 'Audit'
-                            },
-                            {
-                                'type': 'text',
                                 'key': 'risk',
                                 'name': 'Risk'
                             },
                             {
                                 'type': 'text',
                                 'key': 'remediation.description',
-                                'name': 'Remediation'
+                                'name': 'Remediation',
+                                'options': {
+                                    'link': '{{ remediation.link }}',
+                                }
                             }
                         ],
                         'root_path': 'data.checks'
@@ -361,7 +359,15 @@ _METADATA = {
                                 'type': 'text',
                                 'key': 'region_code',
                                 'name': 'Region',
-                                'reference': 'inventory.Region'
+                                'reference': {
+                                    'resource_type': 'inventory.Region',
+                                    'reference_key': 'region_code'
+                                }
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'audit',
+                                'name': 'Audit'
                             },
                         ],
                         'root_path': 'data.findings'

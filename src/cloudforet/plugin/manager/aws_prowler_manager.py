@@ -90,7 +90,7 @@ class AWSProwlerManager(CollectorManager):
                     compliance_results[compliance_id]['data']['severity'], severity)
 
                 compliance_results[compliance_id]['data'] = self._update_compliance_status_and_stats(
-                    compliance_results[compliance_id]['data'], status, score, check_exists)
+                    compliance_results[compliance_id]['data'], status, score)
 
                 compliance_results[compliance_id]['data']['findings'].append(self._make_finding(check_result))
 
@@ -105,17 +105,37 @@ class AWSProwlerManager(CollectorManager):
     def _convert_results(self, compliance_results):
         results = []
         for compliance_result in compliance_results.values():
-            compliance_result['data']['display'] = self._make_compliance_display(compliance_result['data']['stats'])
+            total_check_count = 0
+            pass_check_count = 0
+            fail_check_count = 0
+            info_check_count = 0
+
             compliance_result['data']['stats']['score']['percent'] = \
                 self._calculate_score(compliance_result['data']['stats'])
 
             changed_checks = []
             for check in compliance_result['data']['checks'].values():
+                total_check_count += 1
+                if check['status'] == 'FAIL':
+                    fail_check_count += 1
+                elif check['status'] == 'INFO':
+                    info_check_count += 1
+                else:
+                    pass_check_count += 1
+
                 check['display'] = self._make_check_display(check['stats'])
                 check['stats']['score']['percent'] = self._calculate_score(check['stats'])
                 changed_checks.append(check)
 
             compliance_result['data']['checks'] = changed_checks
+            compliance_result['data']['stats']['checks'] = {
+                'total': total_check_count,
+                'pass': pass_check_count,
+                'fail': fail_check_count,
+                'info': info_check_count
+            }
+
+            compliance_result['data']['display'] = self._make_compliance_display(compliance_result['data']['stats'])
 
             results.append(compliance_result)
 
@@ -168,7 +188,6 @@ class AWSProwlerManager(CollectorManager):
             'check_type': check_result['CheckType'],
             'status': 'PASS',
             'severity': _SEVERITY_MAP.get(check_result['Severity'], 'UNKNOWN'),
-            'audit': check_result['StatusExtended'],
             'risk': check_result['Risk'],
             'remediation': self._make_remediation(check_result['Remediation']),
             'stats': {
@@ -203,6 +222,7 @@ class AWSProwlerManager(CollectorManager):
             'check_id': check_result['CheckID'],
             'check_title': check_result['CheckTitle'],
             'status': check_result['Status'],
+            'status_extended': check_result['StatusExtended'],
             'resource': check_result['ResourceId'] or check_result['ResourceArn'],
             'resource_type': check_result['ResourceType'],
             'region_code': check_result['Region'],
@@ -227,8 +247,7 @@ class AWSProwlerManager(CollectorManager):
         return check
 
     @staticmethod
-    def _update_compliance_status_and_stats(compliance_result_data: dict, status: str, score: int,
-                                            check_exists: bool) -> dict:
+    def _update_compliance_status_and_stats(compliance_result_data: dict, status: str, score: int) -> dict:
         compliance_result_data['stats']['findings']['total'] += 1
 
         if status == 'FAIL':
@@ -244,14 +263,14 @@ class AWSProwlerManager(CollectorManager):
             compliance_result_data['stats']['score']['pass'] += score
             compliance_result_data['stats']['findings']['pass'] += 1
 
-        if not check_exists:
-            compliance_result_data['stats']['checks']['total'] += 1
-            if status == 'FAIL':
-                compliance_result_data['stats']['checks']['fail'] += 1
-            elif status == 'PASS':
-                compliance_result_data['stats']['checks']['pass'] += 1
-            else:
-                compliance_result_data['stats']['checks']['info'] += 1
+        # if not check_exists:
+        #     compliance_result_data['stats']['checks']['total'] += 1
+        #     if status == 'FAIL':
+        #         compliance_result_data['stats']['checks']['fail'] += 1
+        #     elif status == 'PASS':
+        #         compliance_result_data['stats']['checks']['pass'] += 1
+        #     else:
+        #         compliance_result_data['stats']['checks']['info'] += 1
 
         return compliance_result_data
 
