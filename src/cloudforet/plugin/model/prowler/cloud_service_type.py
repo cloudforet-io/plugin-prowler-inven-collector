@@ -121,16 +121,16 @@ _METADATA = {
                         },
                         {
                             'type': 'text',
-                            'key': 'data.display.checks',
-                            'name': 'Checks',
+                            'key': 'data.display.findings',
+                            'name': 'Findings',
                             'options': {
                                 'sortable': False
                             }
                         },
                         {
                             'type': 'text',
-                            'key': 'data.display.findings',
-                            'name': 'Findings',
+                            'key': 'data.display.checks',
+                            'name': 'Checks',
                             'options': {
                                 'sortable': False,
                                 'is_optional': True
@@ -139,7 +139,10 @@ _METADATA = {
                         {
                             'type': 'text',
                             'key': 'data.stats.score.percent',
-                            'name': 'Compliance Score'
+                            'name': 'Compliance Score',
+                            'options': {
+                                'is_optional': True
+                            }
                         },
                         {
                             'type': 'text',
