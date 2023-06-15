@@ -297,10 +297,7 @@ _METADATA = {
                             {
                                 'type': 'text',
                                 'key': 'remediation.description',
-                                'name': 'Remediation',
-                                'options': {
-                                    'link': '{{ remediation.link }}',
-                                }
+                                'name': 'Remediation'
                             }
                         ],
                         'root_path': 'data.checks'
@@ -366,8 +363,8 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'audit',
-                                'name': 'Audit'
+                                'key': 'status_extended',
+                                'name': 'Status Extended'
                             },
                         ],
                         'root_path': 'data.findings'
