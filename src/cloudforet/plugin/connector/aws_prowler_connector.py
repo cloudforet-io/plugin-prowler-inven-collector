@@ -20,11 +20,20 @@ _AWS_PROFILE_DIR = _AWS_PROFILE_PATH.rsplit('/', 1)[0]
 class AWSProfileManager:
     def __init__(self, credentials: dict):
         self._profile_name = utils.random_string()
+        self._source_profile_name = None
         self._credentials = credentials
 
     @property
     def profile_name(self) -> str:
         return self._profile_name
+
+    @property
+    def source_profile_name(self) -> str:
+        return self._source_profile_name
+
+    @source_profile_name.setter
+    def source_profile_name(self, value: str):
+        self._source_profile_name = value
 
     @property
     def credentials(self) -> dict:
@@ -52,11 +61,21 @@ class AWSProfileManager:
 
         aws_profile.add_section(self.profile_name)
 
-        for key, value in self._credentials.items():
-            aws_profile.set(self.profile_name, key, value)
+        if 'role_arn' in self._credentials:
+            self.source_profile_name = utils.random_string()
+            aws_profile.add_section(self.source_profile_name)
+            aws_profile.set(self.source_profile_name, 'aws_access_key_id', self._credentials['aws_access_key_id'])
+            aws_profile.set(self.source_profile_name, 'aws_secret_access_key', self._credentials['aws_secret_access_key'])
 
-        # aws_profile.set(self.profile_name, 'aws_access_key_id', self._credentials['aws_access_key_id'])
-        # aws_profile.set(self.profile_name, 'aws_secret_access_key', self._credentials['aws_secret_access_key'])
+            aws_profile.set(self.profile_name, 'role_arn', self._credentials['role_arn'])
+            aws_profile.set(self.profile_name, 'source_profile', self.source_profile_name)
+
+            if 'external_id' in self._credentials:
+                aws_profile.set(self.profile_name, 'external_id', self._credentials['external_id'])
+
+        else:
+            aws_profile.set(self.profile_name, 'aws_access_key_id', self._credentials['aws_access_key_id'])
+            aws_profile.set(self.profile_name, 'aws_secret_access_key', self._credentials['aws_secret_access_key'])
 
         with open(_AWS_PROFILE_PATH, 'w') as f:
             aws_profile.write(f)
@@ -77,6 +96,9 @@ class AWSProfileManager:
 
         if self.profile_name in aws_profile.sections():
             aws_profile.remove_section(self.profile_name)
+
+        if self.source_profile_name and self.source_profile_name in aws_profile.sections():
+            aws_profile.remove_section(self.source_profile_name)
 
         with open(_AWS_PROFILE_PATH, 'w') as f:
             aws_profile.write(f)
@@ -102,8 +124,6 @@ class AWSProwlerConnector(BaseConnector):
 
     def check(self, options: dict, secret_data: dict, schema: str):
         self._check_secret_data(secret_data)
-        role_arn = secret_data.get('role_arn')
-        external_id = secret_data.get('external_id')
         regions = options.get('regions', [])
 
         compliance_type = COMPLIANCE_TYPES['aws'].get(options['compliance_type'])
@@ -118,12 +138,6 @@ class AWSProwlerConnector(BaseConnector):
                 if regions:
                     region_filter = ['-f'] + regions
                     cmd += region_filter
-
-                # if role_arn:
-                #     cmd += ['--role', role_arn]
-                #
-                # if external_id:
-                #     cmd += ['--external-id', external_id]
 
                 _LOGGER.debug(f'[check] command: {cmd}')
 
