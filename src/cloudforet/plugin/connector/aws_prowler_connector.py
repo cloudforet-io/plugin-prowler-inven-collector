@@ -52,8 +52,11 @@ class AWSProfileManager:
 
         aws_profile.add_section(self.profile_name)
 
-        aws_profile.set(self.profile_name, 'aws_access_key_id', self._credentials['aws_access_key_id'])
-        aws_profile.set(self.profile_name, 'aws_secret_access_key', self._credentials['aws_secret_access_key'])
+        for key, value in self._credentials.items():
+            aws_profile.set(self.profile_name, key, value)
+
+        # aws_profile.set(self.profile_name, 'aws_access_key_id', self._credentials['aws_access_key_id'])
+        # aws_profile.set(self.profile_name, 'aws_secret_access_key', self._credentials['aws_secret_access_key'])
 
         with open(_AWS_PROFILE_PATH, 'w') as f:
             aws_profile.write(f)
@@ -116,11 +119,11 @@ class AWSProwlerConnector(BaseConnector):
                     region_filter = ['-f'] + regions
                     cmd += region_filter
 
-                if role_arn:
-                    cmd += ['--role', role_arn]
-
-                if external_id:
-                    cmd += ['--external-id', external_id]
+                # if role_arn:
+                #     cmd += ['--role', role_arn]
+                #
+                # if external_id:
+                #     cmd += ['--external-id', external_id]
 
                 _LOGGER.debug(f'[check] command: {cmd}')
 
