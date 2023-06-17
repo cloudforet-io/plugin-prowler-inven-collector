@@ -178,7 +178,7 @@ class AWSPluginInfo(PluginInfo):
                     'default': 'CIS-1.5'
                 },
                 'regions': {
-                    'title': 'Region',
+                    'title': 'Region Filter',
                     'type': 'array',
                     'items': {
                         'enum': REGIONS['aws']
