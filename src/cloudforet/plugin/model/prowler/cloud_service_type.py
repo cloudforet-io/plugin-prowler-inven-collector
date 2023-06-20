@@ -67,6 +67,17 @@ _METADATA = {
                 'data_type': 'float'
             },
             {
+                'key': 'data.severity',
+                'name': 'Severity',
+                'enums': [
+                    'CRITICAL',
+                    'HIGH',
+                    'MEDIUM',
+                    'LOW',
+                    'INFORMATIONAL'
+                ]
+            },
+            {
                 'key': 'data.service',
                 'name': 'Service'
             }
