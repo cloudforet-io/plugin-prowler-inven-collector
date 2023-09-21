@@ -8,7 +8,7 @@ from typing import List
 from spaceone.core import utils
 from spaceone.core.connector import BaseConnector
 from cloudforet.plugin.error.custom import *
-from cloudforet.plugin.model.prowler.collector import COMPLIANCE_TYPES
+from cloudforet.plugin.model.prowler.collector import COMPLIANCE_FRAMEWORKS
 
 __all__ = ['AWSProwlerConnector']
 
@@ -126,14 +126,14 @@ class AWSProwlerConnector(BaseConnector):
         self._check_secret_data(secret_data)
         regions = options.get('regions', [])
 
-        compliance_type = COMPLIANCE_TYPES['aws'].get(options['compliance_type'])
+        compliance_framework = COMPLIANCE_FRAMEWORKS['aws'].get(options['compliance_framework'])
 
         with tempfile.TemporaryDirectory() as temp_dir:
             with AWSProfileManager(secret_data) as aws_profile:
                 cmd = self._command_prefix(aws_profile.profile_name)
 
                 cmd += ['-M', 'json', '-o', temp_dir, '-F', 'output', '-z']
-                cmd += ['--compliance', compliance_type]
+                cmd += ['--compliance', compliance_framework]
 
                 if regions:
                     region_filter = ['-f'] + regions

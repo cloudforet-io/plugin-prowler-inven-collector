@@ -8,7 +8,7 @@ SEVERITIES = {
     'Informational': 'informational',
 }
 
-COMPLIANCE_TYPES = {
+COMPLIANCE_FRAMEWORKS = {
     'aws': {
         'CIS-1.4': 'cis_1.4_aws',
         'CIS-1.5': 'cis_1.5_aws',
@@ -161,8 +161,8 @@ class AWSPluginInfo(PluginInfo):
             Feature.garbage_collection
         ],
         'options_schema': {
-            'required': ['provider', 'compliance_type'],
-            'order': ['provider', 'compliance_type', 'regions'],
+            'required': ['provider', 'compliance_framework'],
+            'order': ['provider', 'compliance_framework', 'regions'],
             'type': 'object',
             'properties': {
                 'provider': {
@@ -171,10 +171,10 @@ class AWSPluginInfo(PluginInfo):
                     'default': 'aws',
                     'disabled': True
                 },
-                'compliance_type': {
-                    'title': 'Compliance Type',
+                'compliance_framework': {
+                    'title': 'Compliance Framework',
                     'type': 'string',
-                    'enum': list(COMPLIANCE_TYPES['aws'].keys()),
+                    'enum': list(COMPLIANCE_FRAMEWORKS['aws'].keys()),
                     'default': 'CIS-1.5'
                 },
                 'regions': {
@@ -217,8 +217,8 @@ class GoogleCloudPluginInfo(PluginInfo):
             Feature.garbage_collection
         ],
         'options_schema': {
-            'required': ['provider', 'compliance_type'],
-            'order': ['provider', 'compliance_type'],
+            'required': ['provider', 'compliance_framework'],
+            'order': ['provider', 'compliance_framework'],
             'type': 'object',
             'properties': {
                 'provider': {
@@ -227,10 +227,10 @@ class GoogleCloudPluginInfo(PluginInfo):
                     'default': 'google_cloud',
                     'disabled': True
                 },
-                'compliance_type': {
-                    'title': 'Compliance Type',
+                'compliance_framework': {
+                    'title': 'Compliance Framework',
                     'type': 'string',
-                    'enum': list(COMPLIANCE_TYPES['google_cloud'].keys()),
+                    'enum': list(COMPLIANCE_FRAMEWORKS['google_cloud'].keys()),
                     'default': 'Google-Cloud-Standard'
                 },
                 # 'services': {
@@ -266,8 +266,8 @@ class AzurePluginInfo(PluginInfo):
             Feature.garbage_collection
         ],
         'options_schema': {
-            'required': ['provider', 'compliance_type'],
-            'order': ['provider', 'compliance_type'],
+            'required': ['provider', 'compliance_framework'],
+            'order': ['provider', 'compliance_framework'],
             'type': 'object',
             'properties': {
                 'provider': {
@@ -276,10 +276,10 @@ class AzurePluginInfo(PluginInfo):
                     'default': 'azure',
                     'disabled': True
                 },
-                'compliance_type': {
-                    'title': 'Compliance Type',
+                'compliance_framework': {
+                    'title': 'Compliance Framework',
                     'type': 'string',
-                    'enum': list(COMPLIANCE_TYPES['azure'].keys()),
+                    'enum': list(COMPLIANCE_FRAMEWORKS['azure'].keys()),
                     'default': 'Azure-Standard'
                 },
                 # 'services': {

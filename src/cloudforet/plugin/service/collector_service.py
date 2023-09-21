@@ -58,7 +58,7 @@ class CollectorService(BaseService):
         collector_mgr.verify_client(options, secret_data, schema)
 
     @transaction
-    @check_required(['options', 'options.provider', 'options.compliance_type', 'secret_data'])
+    @check_required(['options', 'options.provider', 'options.compliance_framework', 'secret_data'])
     def collect(self, params):
         """ Collect external data
 

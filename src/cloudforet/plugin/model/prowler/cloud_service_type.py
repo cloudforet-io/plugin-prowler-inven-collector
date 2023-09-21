@@ -4,7 +4,7 @@ from cloudforet.plugin.model.cloud_service_type_model import BaseCloudServiceTyp
 _METADATA = {
     'query_sets': [
         {
-            'name': 'Prowler Status',
+            'name': 'AWS Prowler',
             'query_options': {
                 'group_by': [
                     'data.status',

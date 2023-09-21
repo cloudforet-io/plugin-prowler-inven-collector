@@ -8,7 +8,7 @@ from cloudforet.plugin.error.custom import *
 from cloudforet.plugin.manager.collector_manager import CollectorManager
 from cloudforet.plugin.connector.aws_prowler_connector import AWSProwlerConnector
 from cloudforet.plugin.model.prowler.cloud_service_type import CloudServiceType
-from cloudforet.plugin.model.prowler.collector import COMPLIANCE_TYPES
+from cloudforet.plugin.model.prowler.collector import COMPLIANCE_FRAMEWORKS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,12 +38,12 @@ class AWSProwlerManager(CollectorManager):
         self.provider = 'aws'
         self.cloud_service_group = 'Prowler'
         self.cloud_service_type = None
-        self.compliance_type_info = {}
+        self.compliance_framework_info = {}
 
     def collect(self, options: dict, secret_data: dict, schema: str) -> Generator[dict, None, None]:
-        self.cloud_service_type = options['compliance_type']
-        self._check_compliance_type()
-        self._load_compliance_type_info()
+        self.cloud_service_type = options['compliance_framework']
+        self._check_compliance_framework()
+        self._load_compliance_framework_info()
 
         self._wait_random_time()
 
@@ -52,6 +52,7 @@ class AWSProwlerManager(CollectorManager):
 
             # Return Cloud Service Type
             cloud_service_type = CloudServiceType(name=self.cloud_service_type, provider=self.provider)
+            cloud_service_type.metadata['query_sets'][0]['name'] = f'AWS {self.cloud_service_type}'
             yield self.make_response(cloud_service_type.dict(),
                                      {'1': ['name', 'group', 'provider']},
                                      resource_type='inventory.CloudServiceType')
@@ -277,7 +278,7 @@ class AWSProwlerManager(CollectorManager):
     def _make_base_compliance_result(self, compliance_id: str, requirement_id: str, severity: str,
                                      check_result: dict) -> dict:
         compliance_result = {
-            'name': self.compliance_type_info[requirement_id],
+            'name': self.compliance_framework_info[requirement_id],
             'reference': {
                 'resource_id': compliance_id,
             },
@@ -345,14 +346,15 @@ class AWSProwlerManager(CollectorManager):
 
         time.sleep(random_time)
 
-    def _check_compliance_type(self):
-        all_compliance_types = list(COMPLIANCE_TYPES['aws'].keys())
-        if self.cloud_service_type not in all_compliance_types:
-            raise ERROR_INVALID_PARAMETER(key='options.compliance_type',
-                                          reason=f'Not supported compliance type. (compliance_types = {all_compliance_types})')
+    def _check_compliance_framework(self):
+        all_compliance_frameworks = list(COMPLIANCE_FRAMEWORKS['aws'].keys())
+        if self.cloud_service_type not in all_compliance_frameworks:
+            raise ERROR_INVALID_PARAMETER(key='options.compliance_framework',
+                                          reason=f'Not supported compliance framework. '
+                                                 f'(compliance_frameworks = {all_compliance_frameworks})')
 
-    def _load_compliance_type_info(self):
-        compliance_type = COMPLIANCE_TYPES['aws'][self.cloud_service_type]
+    def _load_compliance_framework_info(self):
+        compliance_framework = COMPLIANCE_FRAMEWORKS['aws'][self.cloud_service_type]
         compliance_frameworks = bulk_load_compliance_frameworks(self.provider)
-        for requirement in compliance_frameworks[compliance_type].Requirements:
-            self.compliance_type_info[requirement.Id] = requirement.Description
+        for requirement in compliance_frameworks[compliance_framework].Requirements:
+            self.compliance_framework_info[requirement.Id] = requirement.Description
