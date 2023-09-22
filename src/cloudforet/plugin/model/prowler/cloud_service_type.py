@@ -5,6 +5,10 @@ _METADATA = {
     'query_sets': [
         {
             'name': 'AWS Prowler',
+            'unit': {
+                'pass_score': '%',
+                'fail_score': '%'
+            },
             'query_options': {
                 'group_by': [
                     'data.status',
