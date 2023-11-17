@@ -71,7 +71,7 @@ class AWSProwlerManager(CollectorManager):
             account = check_result['AccountId']
             requirements = check_result.get('Compliance', {}).get(self.cloud_service_type, [])
             for requirement_id in requirements:
-                compliance_id = f'{self.cloud_service_type}:{requirement_id}:{account}'
+                compliance_id = f'{self.cloud_service_type}:{account}:{requirement_id}'
                 check_id = check_result['CheckID']
                 status = check_result['Status']
                 region_code = check_result['Region']

@@ -252,19 +252,77 @@ _METADATA = {
         'sub_data': {
             'layouts': [
                 {
-                    'type': 'table',
+                    'type': 'query-search-table',
                     'name': 'Checks',
                     'options': {
+                        'unwind': {
+                            'path': 'data.checks'
+                        },
+                        'search': [
+                            {
+                                'key': 'data.requirement_id',
+                                'name': 'Requirement ID'
+                            },
+                            {
+                                'key': 'data.checks.check_title',
+                                'name': 'Check Title'
+                            },
+                            {
+                                'key': 'data.checks.status',
+                                'name': 'Status',
+                                'enums': {
+                                    'FAIL': {
+                                        'label': 'FAIL'
+                                    },
+                                    'PASS': {
+                                        'label': 'PASS'
+                                    },
+                                    'INFO': {
+                                        'label': 'INFO'
+                                    }
+                                }
+                            },
+                            {
+                                'key': 'data.checks.severity',
+                                'name': 'Severity',
+                                'enums': {
+                                    'CRITICAL': {
+                                        'label': 'CRITICAL'
+                                    },
+                                    'HIGH': {
+                                        'label': 'HIGH'
+                                    },
+                                    'MEDIUM': {
+                                        'label': 'MEDIUM'
+                                    },
+                                    'LOW': {
+                                        'label': 'LOW'
+                                    },
+                                    'INFORMATIONAL': {
+                                        'label': 'INFORMATIONAL'
+                                    }
+                                }
+                            },
+                            {
+                                'key': 'data.checks.service',
+                                'name': 'Service'
+                            }
+                        ],
                         'fields': [
                             {
                                 'type': 'text',
-                                'key': 'check_title',
+                                'key': 'data.requirement_id',
+                                'name': 'Requirement ID'
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'data.checks.check_title',
                                 'name': 'Check Title'
                             },
                             {
                                 'type': 'enum',
                                 'name': 'Status',
-                                'key': 'status',
+                                'key': 'data.checks.status',
                                 'options': {
                                     'FAIL': {
                                         'type': 'badge',
@@ -288,7 +346,7 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'display.findings',
+                                'key': 'data.checks.display.findings',
                                 'name': 'Findings',
                                 'options': {
                                     'sortable': False
@@ -296,42 +354,86 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'severity',
+                                'key': 'data.checks.severity',
                                 'name': 'Severity'
                             },
                             {
                                 'type': 'text',
-                                'key': 'service',
+                                'key': 'data.checks.service',
                                 'name': 'Service'
                             },
                             {
                                 'type': 'text',
-                                'key': 'risk',
+                                'key': 'data.checks.risk',
                                 'name': 'Risk'
                             },
                             {
                                 'type': 'text',
-                                'key': 'remediation.description',
+                                'key': 'data.checks.remediation.description',
                                 'name': 'Remediation'
                             }
-                        ],
-                        'root_path': 'data.checks'
+                        ]
                     }
                 },
                 {
-                    'type': 'table',
+                    'type': 'query-search-table',
                     'name': 'Findings',
                     'options': {
+                        'unwind': {
+                            'path': 'data.findings'
+                        },
+                        'search': [
+                            {
+                                'key': 'data.requirement_id',
+                                'name': 'Requirement ID'
+                            },
+                            {
+                                'key': 'data.findings.check_title',
+                                'name': 'Check Title'
+                            },
+                            {
+                                'key': 'data.findings.status',
+                                'name': 'Status',
+                                'enums': {
+                                    'FAIL': {
+                                        'label': 'FAIL'
+                                    },
+                                    'PASS': {
+                                        'label': 'PASS'
+                                    },
+                                    'INFO': {
+                                        'label': 'INFO'
+                                    }
+                                }
+                            },
+                            {
+                                'key': 'data.findings.resource_type',
+                                'name': 'Resource Type'
+                            },
+                            {
+                                'key': 'data.findings.resource',
+                                'name': 'Resource'
+                            },
+                            {
+                                'key': 'data.findings.region_code',
+                                'name': 'Region'
+                            }
+                        ],
                         'fields': [
                             {
                                 'type': 'text',
-                                'key': 'check_title',
+                                'key': 'data.requirement_id',
+                                'name': 'Requirement ID'
+                            },
+                            {
+                                'type': 'text',
+                                'key': 'data.findings.check_title',
                                 'name': 'Check Title'
                             },
                             {
                                 'type': 'enum',
                                 'name': 'Status',
-                                'key': 'status',
+                                'key': 'data.findings.status',
                                 'options': {
                                     'FAIL': {
                                         'type': 'badge',
@@ -355,12 +457,12 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'resource_type',
+                                'key': 'data.findings.resource_type',
                                 'name': 'Resource Type'
                             },
                             {
                                 'type': 'text',
-                                'key': 'resource',
+                                'key': 'data.findings.resource',
                                 'name': 'Resource',
                                 'reference': {
                                     'resource_type': 'inventory.CloudService',
@@ -369,7 +471,7 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'region_code',
+                                'key': 'data.findings.region_code',
                                 'name': 'Region',
                                 'reference': {
                                     'resource_type': 'inventory.Region',
@@ -378,11 +480,10 @@ _METADATA = {
                             },
                             {
                                 'type': 'text',
-                                'key': 'status_extended',
+                                'key': 'data.findings.status_extended',
                                 'name': 'Status Extended'
                             },
-                        ],
-                        'root_path': 'data.findings'
+                        ]
                     }
                 }
             ]
