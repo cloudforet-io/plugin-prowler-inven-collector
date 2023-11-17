@@ -270,38 +270,22 @@ _METADATA = {
                             {
                                 'key': 'data.checks.status',
                                 'name': 'Status',
-                                'enums': {
-                                    'FAIL': {
-                                        'label': 'FAIL'
-                                    },
-                                    'PASS': {
-                                        'label': 'PASS'
-                                    },
-                                    'INFO': {
-                                        'label': 'INFO'
-                                    }
-                                }
+                                'enums': [
+                                    'FAIL',
+                                    'PASS',
+                                    'INFO'
+                                ]
                             },
                             {
                                 'key': 'data.checks.severity',
                                 'name': 'Severity',
-                                'enums': {
-                                    'CRITICAL': {
-                                        'label': 'CRITICAL'
-                                    },
-                                    'HIGH': {
-                                        'label': 'HIGH'
-                                    },
-                                    'MEDIUM': {
-                                        'label': 'MEDIUM'
-                                    },
-                                    'LOW': {
-                                        'label': 'LOW'
-                                    },
-                                    'INFORMATIONAL': {
-                                        'label': 'INFORMATIONAL'
-                                    }
-                                }
+                                'enums': [
+                                    'CRITICAL',
+                                    'HIGH',
+                                    'MEDIUM',
+                                    'LOW',
+                                    'INFORMATIONAL'
+                                ]
                             },
                             {
                                 'key': 'data.checks.service',
@@ -394,17 +378,11 @@ _METADATA = {
                             {
                                 'key': 'data.findings.status',
                                 'name': 'Status',
-                                'enums': {
-                                    'FAIL': {
-                                        'label': 'FAIL'
-                                    },
-                                    'PASS': {
-                                        'label': 'PASS'
-                                    },
-                                    'INFO': {
-                                        'label': 'INFO'
-                                    }
-                                }
+                                'enums': [
+                                    'FAIL',
+                                    'PASS',
+                                    'INFO'
+                                ]
                             },
                             {
                                 'key': 'data.findings.resource_type',
