@@ -63,7 +63,12 @@ _METADATA = {
             },
             {
                 'key': 'data.status',
-                'name': 'Status'
+                'name': 'Status',
+                'enums': [
+                    'FAIL',
+                    'PASS',
+                    'INFO'
+                ]
             },
             {
                 'key': 'data.stats.score.percent',
@@ -258,6 +263,10 @@ _METADATA = {
                         'unwind': {
                             'path': 'data.checks'
                         },
+                        'default_sort': {
+                            'key': 'data.checks.status',
+                            'desc': False
+                        },
                         'search': [
                             {
                                 'key': 'data.requirement_id',
@@ -365,6 +374,10 @@ _METADATA = {
                     'options': {
                         'unwind': {
                             'path': 'data.findings'
+                        },
+                        'default_sort': {
+                            'key': 'data.findings.status',
+                            'desc': False
                         },
                         'search': [
                             {
