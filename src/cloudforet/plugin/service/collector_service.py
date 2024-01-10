@@ -11,11 +11,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CollectorService(BaseService):
-
     @transaction
-    @check_required(['options', 'options.provider'])
+    @check_required(["options", "options.provider"])
     def init(self, params):
-        """ init plugin by options
+        """init plugin by options
 
         Args:
             params (dict): {
@@ -27,15 +26,15 @@ class CollectorService(BaseService):
             plugin_data (dict)
         """
 
-        options = params.get('options', {})
+        options = params.get("options", {})
 
         collector_mgr: CollectorManager = self.locator.get_manager(CollectorManager)
         return collector_mgr.init_response(options)
 
     @transaction
-    @check_required(['options', 'options.provider', 'secret_data'])
+    @check_required(["options", "options.provider", "secret_data"])
     def verify(self, params):
-        """ Verifying collector plugin
+        """Verifying collector plugin
 
         Args:
             params (dict): {
@@ -49,18 +48,20 @@ class CollectorService(BaseService):
             None
         """
 
-        options = params['options']
-        secret_data = params['secret_data']
-        schema = params.get('schema')
-        provider = options.get('provider', 'AWS')
+        options = params["options"]
+        secret_data = params["secret_data"]
+        schema = params.get("schema")
+        provider = options.get("provider", "AWS")
 
         collector_mgr: AWSProwlerManager = self.locator.get_manager(AWSProwlerManager)
         collector_mgr.verify_client(options, secret_data, schema)
 
     @transaction
-    @check_required(['options', 'options.provider', 'options.compliance_framework', 'secret_data'])
+    @check_required(
+        ["options", "options.provider", "options.compliance_framework", "secret_data"]
+    )
     def collect(self, params):
-        """ Collect external data
+        """Collect external data
 
         Args:
             params (dict): {
@@ -74,23 +75,15 @@ class CollectorService(BaseService):
             generator of resource_data (dict)
         """
 
-        options = params['options']
-        provider = params['options'].get('provider')
-        secret_data = params['secret_data']
-        schema = params.get('schema')
+        options = params["options"]
+        provider = params["options"].get("provider")
+        secret_data = params["secret_data"]
+        schema = params.get("schema")
 
-        collector_mgr: CollectorManager = self._get_collector_manager_from_provider(provider)
+        collector_mgr: CollectorManager = (
+            CollectorManager.get_collector_manager_by_provider(provider)
+        )
         iterator: Generator = collector_mgr.collect(options, secret_data, schema)
 
         for resource_data in iterator:
             yield resource_data
-
-    def _get_collector_manager_from_provider(self, provider):
-        if provider == 'aws':
-            return self.locator.get_manager(AWSProwlerManager)
-        elif provider == 'azure':
-            return self.locator.get_manager(AWSProwlerManager)
-        elif provider == 'google_cloud':
-            return self.locator.get_manager(AWSProwlerManager)
-        else:
-            raise ERROR_INVALID_PARAMETER(key='options.provider', reason='Not supported provider')
