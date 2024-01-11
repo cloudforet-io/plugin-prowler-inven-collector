@@ -118,6 +118,7 @@ class AzureProwlerConnector(BaseConnector):
             "prowler",
             "azure",
             "--sp-env-auth",
-            "-b" "--azure-region",
+            "-b",
+            "--azure-region",
             "AzureCloud",
         ]
