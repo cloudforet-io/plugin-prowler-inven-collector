@@ -42,7 +42,6 @@ _METADATA = {
     ],
     "view": {
         "search": [
-            {"key": "data.requirement_id", "name": "Requirement ID"},
             {"key": "data.status", "name": "Status", "enums": ["FAIL", "PASS", "INFO"]},
             {
                 "key": "data.stats.score.percent",
@@ -61,13 +60,8 @@ _METADATA = {
                 "name": "",
                 "type": "query-search-table",
                 "options": {
-                    "default_sort": {"key": "data.requirement_id", "desc": False},
+                    "default_sort": {"key": "name", "desc": False},
                     "fields": [
-                        {
-                            "type": "text",
-                            "key": "data.requirement_id",
-                            "name": "Requirement ID",
-                        },
                         {
                             "type": "text",
                             "key": "data.description",
@@ -177,7 +171,6 @@ _METADATA = {
                         "unwind": {"path": "data.checks"},
                         "default_sort": {"key": "data.checks.status", "desc": False},
                         "search": [
-                            {"key": "data.requirement_id", "name": "Requirement ID"},
                             {"key": "data.checks.check_title", "name": "Check Title"},
                             {
                                 "key": "data.checks.status",
@@ -198,11 +191,6 @@ _METADATA = {
                             {"key": "data.checks.service", "name": "Service"},
                         ],
                         "fields": [
-                            {
-                                "type": "text",
-                                "key": "data.requirement_id",
-                                "name": "Requirement ID",
-                            },
                             {
                                 "type": "text",
                                 "key": "data.checks.check_title",
@@ -259,7 +247,6 @@ _METADATA = {
                         "unwind": {"path": "data.findings"},
                         "default_sort": {"key": "data.findings.status", "desc": False},
                         "search": [
-                            {"key": "data.requirement_id", "name": "Requirement ID"},
                             {"key": "data.findings.check_title", "name": "Check Title"},
                             {
                                 "key": "data.findings.status",
@@ -274,11 +261,6 @@ _METADATA = {
                             {"key": "data.findings.region_code", "name": "Region"},
                         ],
                         "fields": [
-                            {
-                                "type": "text",
-                                "key": "data.requirement_id",
-                                "name": "Requirement ID",
-                            },
                             {
                                 "type": "text",
                                 "key": "data.findings.check_title",
@@ -340,7 +322,7 @@ _METADATA = {
 }
 
 
-class CloudServiceType(BaseCloudServiceType):
+class StandardCloudServiceType(BaseCloudServiceType):
     group: str = "Prowler"
     is_primary: bool = True
     is_major: bool = True

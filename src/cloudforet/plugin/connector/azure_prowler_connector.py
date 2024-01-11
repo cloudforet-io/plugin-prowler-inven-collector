@@ -111,7 +111,13 @@ class AzureProwlerConnector(BaseConnector):
             raise ERROR_REQUIRED_PARAMETER(key="secret_data.client_id")
 
     @staticmethod
-    def _command_prefix(
-        azure_profile_name: str = None, authentication_type: str = None
-    ) -> List[str]:
-        return ["python3", "-m", "prowler", "azure", "--sp-env-auth", "-b"]
+    def _command_prefix() -> List[str]:
+        return [
+            "python3",
+            "-m",
+            "prowler",
+            "azure",
+            "--sp-env-auth",
+            "-b" "--azure-region",
+            "AzureCloud",
+        ]

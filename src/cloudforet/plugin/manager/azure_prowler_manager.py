@@ -8,6 +8,9 @@ from cloudforet.plugin.error.custom import *
 from cloudforet.plugin.manager.collector_manager import CollectorManager
 from cloudforet.plugin.connector.azure_prowler_connector import AzureProwlerConnector
 from cloudforet.plugin.model.prowler.cloud_service_type import CloudServiceType
+from cloudforet.plugin.model.prowler.standard_cloud_service_type import (
+    StandardCloudServiceType,
+)
 from cloudforet.plugin.model.prowler.collector import COMPLIANCE_FRAMEWORKS
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,12 +61,21 @@ class AzureProwlerManager(CollectorManager):
             )
 
             # Return Cloud Service Type
-            cloud_service_type = CloudServiceType(
-                name=self.cloud_service_type, provider=self.provider
-            )
-            cloud_service_type.metadata["query_sets"][0][
-                "name"
-            ] = f"Azure {self.cloud_service_type}"
+            if self.cloud_service_type == "Azure-Standard":
+                cloud_service_type = StandardCloudServiceType(
+                    name=self.cloud_service_type, provider=self.provider
+                )
+                cloud_service_type.metadata["query_sets"][0][
+                    "name"
+                ] = f"{self.cloud_service_type}"
+            else:
+                cloud_service_type = CloudServiceType(
+                    name=self.cloud_service_type, provider=self.provider
+                )
+                cloud_service_type.metadata["query_sets"][0][
+                    "name"
+                ] = f"Azure {self.cloud_service_type}"
+
             yield self.make_response(
                 cloud_service_type.dict(),
                 {"1": ["name", "group", "provider"]},
@@ -232,7 +244,7 @@ class AzureProwlerManager(CollectorManager):
             check_id = check_result["CheckID"]
             status = check_result["Status"]
             region_code = check_result.get("Region")
-            severity = _SEVERITY_MAP.get(check_result["Severity"], "UNKNOWN").upper()
+            severity = _SEVERITY_MAP.get(check_result["Severity"], "UNKNOWN")
             score = _SEVERITY_SCORE_MAP[severity]
 
             if compliance_id not in compliance_results:
