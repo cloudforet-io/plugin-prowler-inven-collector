@@ -1,2 +1,3 @@
 from cloudforet.plugin.manager.aws_prowler_manager import AWSProwlerManager
 from cloudforet.plugin.manager.azure_prowler_manager import AzureProwlerManager
+from cloudforet.plugin.manager.google_prowler_manager import GoogleProwlerManager
