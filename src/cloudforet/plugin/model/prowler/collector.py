@@ -38,7 +38,7 @@ COMPLIANCE_FRAMEWORKS = {
         "FedRAMP-Low-Revision-4": "fedramp_low_revision_4_aws",
     },
     "google_cloud": {
-        "Google-Cloud-Standard": "",
+        "CIS-2.0": "cis_2.0_gcp",
     },
     "azure": {
         "Azure-Standard": "",
@@ -228,7 +228,7 @@ class GoogleCloudPluginInfo(PluginInfo):
                     "title": "Compliance Framework",
                     "type": "string",
                     "enum": list(COMPLIANCE_FRAMEWORKS["google_cloud"].keys()),
-                    "default": "Google-Cloud-Standard",
+                    "default": "CIS-2.0",
                 },
                 # 'services': {
                 #     'title': 'Service',

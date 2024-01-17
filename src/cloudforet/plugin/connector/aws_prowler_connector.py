@@ -7,6 +7,7 @@ from typing import List
 
 from spaceone.core import utils
 from spaceone.core.connector import BaseConnector
+from cloudforet.plugin.lib import ProfileManager
 from cloudforet.plugin.error.custom import *
 from cloudforet.plugin.model.prowler.collector import COMPLIANCE_FRAMEWORKS
 
@@ -19,47 +20,19 @@ _AWS_PROFILE_PATH = os.environ.get(
 _AWS_PROFILE_DIR = _AWS_PROFILE_PATH.rsplit("/", 1)[0]
 
 
-class AWSProfileManager:
-    def __init__(self, credentials: dict):
-        self._profile_name = utils.random_string()
-        self._source_profile_name = None
-        self._credentials = credentials
-
-    @property
-    def profile_name(self) -> str:
-        return self._profile_name
-
-    @property
-    def source_profile_name(self) -> str:
-        return self._source_profile_name
-
-    @source_profile_name.setter
-    def source_profile_name(self, value: str):
-        self._source_profile_name = value
-
-    @property
-    def credentials(self) -> dict:
-        return self._credentials
-
-    def __enter__(self) -> "AWSProfileManager":
-        self._add_aws_profile()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._remove_aws_profile()
-
-    def _add_aws_profile(self):
+class AWSProfileManager(ProfileManager):
+    def _add_profile(self):
         _LOGGER.debug(f"[_AWSProfileManager] add aws profile: {self._profile_name}")
 
         aws_profile = configparser.ConfigParser()
 
         if os.path.exists(_AWS_PROFILE_PATH) is False:
-            self._create_aws_profile_file(aws_profile)
+            self._create_profile_file(aws_profile)
 
         aws_profile.read(_AWS_PROFILE_PATH)
 
         if self.profile_name in aws_profile.sections():
-            self._remove_aws_profile(aws_profile)
+            self._remove_profile(aws_profile)
 
         aws_profile.add_section(self.profile_name)
 
@@ -104,14 +77,13 @@ class AWSProfileManager:
         with open(_AWS_PROFILE_PATH, "w") as f:
             aws_profile.write(f)
 
-    @staticmethod
-    def _create_aws_profile_file(aws_profile: configparser.ConfigParser):
+    def _create_profile_file(self, aws_profile: configparser.ConfigParser):
         os.makedirs(_AWS_PROFILE_DIR, exist_ok=True)
         aws_profile["default"] = {}
         with open(_AWS_PROFILE_PATH, "w") as f:
             aws_profile.write(f)
 
-    def _remove_aws_profile(self, aws_profile: configparser.ConfigParser = None):
+    def _remove_profile(self, aws_profile: configparser.ConfigParser = None):
         _LOGGER.debug(f"[_AWSProfileManager] remove aws profile: {self._profile_name}")
 
         if aws_profile is None:
