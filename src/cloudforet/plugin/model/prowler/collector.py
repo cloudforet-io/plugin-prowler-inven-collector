@@ -18,6 +18,7 @@ COMPLIANCE_FRAMEWORKS = {
     "aws": {
         "CIS-1.4": "cis_1.4_aws",
         "CIS-1.5": "cis_1.5_aws",
+        "CIS-2.0": "cis_2.0_aws",
         "CISA": "cisa_aws",
         "SOC2": "soc2_aws",
         "GDPR": "gdpr_aws",
