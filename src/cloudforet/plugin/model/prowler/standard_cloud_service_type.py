@@ -327,7 +327,7 @@ class StandardCloudServiceType(BaseCloudServiceType):
     is_primary: bool = True
     is_major: bool = True
     metadata: dict = _METADATA
-    labels: List[str] = ["Security", "Compliance"]
+    labels: List[str] = ["Security", "Compliance", "CSPM"]
     tags: dict = {
         "spaceone:icon": "https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/prowler.svg"
     }
