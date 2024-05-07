@@ -539,7 +539,7 @@ class AzureProwlerManager(CollectorManager):
 
     @staticmethod
     def get_subscription_id_from_resource_id(resource_id: str) -> str:
-        blank, prefix, subscription_id, *_ = resource_id.split("/", 10)
+        subscription_id = resource_id.split("/")[2]
         return subscription_id
 
     def _check_compliance_framework(self):
