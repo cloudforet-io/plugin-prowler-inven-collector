@@ -1,5 +1,6 @@
 from spaceone.api.inventory.plugin import collector_pb2
 from spaceone.core.pygrpc.message_type import *
+from spaceone.core import utils
 
 __all__ = ['PluginInfo', 'ResourceInfo']
 
@@ -13,6 +14,9 @@ def PluginInfo(plugin_data):
 
 
 def ResourceInfo(resource_data):
+    if resource_data['resource_type'] == 'inventory.CloudService':
+        resource_data['resource']['json_data'] = utils.dump_json(resource_data['resource']['data'])
+
     info = {
         'state': resource_data['state'],
         'message': resource_data.get('message', ''),
