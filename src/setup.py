@@ -33,7 +33,7 @@ setup(
     install_requires=[
         'spaceone-core',
         'spaceone-api',
-        'prowler',
+        'prowler==3.15.3',
     ],
     zip_safe=False,
 )
