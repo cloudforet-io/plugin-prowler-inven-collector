@@ -16,6 +16,7 @@ def PluginInfo(plugin_data):
 def ResourceInfo(resource_data):
     if resource_data['resource_type'] == 'inventory.CloudService':
         resource_data['resource']['json_data'] = utils.dump_json(resource_data['resource']['data'])
+        del resource_data['resource']['data']
 
     info = {
         'state': resource_data['state'],
