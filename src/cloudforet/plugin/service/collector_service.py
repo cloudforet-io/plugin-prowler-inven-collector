@@ -31,6 +31,7 @@ class CollectorService(BaseService):
         options = params.get("options", {})
 
         collector_mgr: CollectorManager = self.locator.get_manager(CollectorManager)
+
         return collector_mgr.init_response(options)
 
     @transaction
