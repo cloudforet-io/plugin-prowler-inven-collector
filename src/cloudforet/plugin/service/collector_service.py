@@ -76,6 +76,7 @@ class CollectorService(BaseService):
 
         Returns:
             generator of resource_data (dict)
+
         """
 
         options = params["options"]
