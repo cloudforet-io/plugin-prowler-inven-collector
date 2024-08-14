@@ -21,10 +21,6 @@ REQUIRED_SECRET_KEYS = {
         "client_x509_cert_url",
         "universe_domain",
     ],
-    "kubernetes": [
-        "aws_access_key_id",
-        "aws_secret_access_key",
-    ],
 }
 
 SEVERITIES = {
