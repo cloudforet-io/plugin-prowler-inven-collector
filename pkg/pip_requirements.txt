@@ -1,3 +1,4 @@
 spaceone-core
 spaceone-api
-prowler==3.15.3
+prowler==4.3.3
+natsort
