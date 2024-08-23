@@ -3,7 +3,7 @@ import abc
 
 from spaceone.core import utils
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger("spaceone")
 
 
 class ProfileManager:

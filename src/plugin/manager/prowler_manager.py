@@ -1,117 +1,127 @@
+import os
+
+import json
 import time
 import random
 import logging
 from typing import Generator, List
-from prowler.lib.check.check import bulk_load_compliance_frameworks
 
-from cloudforet.plugin.error.custom import *
-from cloudforet.plugin.manager.collector_manager import CollectorManager
-from cloudforet.plugin.connector.aws_prowler_connector import AWSProwlerConnector
-from cloudforet.plugin.model.prowler.cloud_service_type import CloudServiceType
-from cloudforet.plugin.model.prowler.collector import COMPLIANCE_FRAMEWORKS
+from natsort import natsorted
+from prowler.lib.check.check import bulk_load_compliance_frameworks, bulk_load_checks_metadata
+from spaceone.inventory.plugin.collector.lib import make_cloud_service, make_error_response
 
-_LOGGER = logging.getLogger(__name__)
+from plugin.error.custom import *
+from plugin.manager.base import ResourceManager
+from plugin.connector.prowler_connector import ProwlerConnector
+from plugin.conf.collector_conf import *
 
-_SEVERITY_MAP = {
-    "critical": "CRITICAL",
-    "high": "HIGH",
-    "medium": "MEDIUM",
-    "low": "LOW",
-    "informational": "INFORMATIONAL",
-}
-
-_SEVERITY_SCORE_MAP = {
-    "CRITICAL": 4,
-    "HIGH": 3,
-    "MEDIUM": 2,
-    "LOW": 1,
-    "INFORMATIONAL": 0,
-    "UNKNOWN": 1,
-}
+_LOGGER = logging.getLogger("spaceone")
 
 
-class AWSProwlerManager(CollectorManager):
-    provider = "aws"
+class ProwlerManager(ResourceManager):
+    provider = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.aws_prowler_connector: AWSProwlerConnector = self.locator.get_connector(
-            AWSProwlerConnector
-        )
-        self.provider = "aws"
+
+        self.name = None
+        self.provider = None
         self.cloud_service_group = "Prowler"
         self.cloud_service_type = None
-        self.compliance_framework_info = {}
+        self.service_code = None
+        self.is_primary = True
+        self.icon = "prowler.svg"
+        self.labels = ["Security", "Compliance", "CSPM"]
+        self.metadata_path = "metadata/prowler.yaml"
+        self.prowler_connector = None
+        self.requirement_info = {}
+        self.checklist = []
+        self.is_custom_checks = False
+        self.checks_metadata = {}
 
-    def collect(
-        self, options: dict, secret_data: dict, schema: str
+    def collect_cloud_services(
+            self, options: dict, secret_data: dict, schema: str
     ) -> Generator[dict, None, None]:
+        self.provider = options.get("provider")
         self.cloud_service_type = options["compliance_framework"]
+
+        if self.provider == "aws":
+            self.is_primary = True
+            self.name = f"AWS {self.cloud_service_type}"
+        elif self.provider == "azure":
+            self.name = f"Azure {self.cloud_service_type}"
+        elif self.provider == "google_cloud":
+            self.name = f"Google Cloud {self.cloud_service_type}"
+        else:
+            yield ERROR_INVALID_PARAMETER(
+                key="options.provider", reason="Not supported provider."
+            )
+
+        self.checklist = options.get("check_list")
+        self.prowler_connector = ProwlerConnector()
         self._check_compliance_framework()
-        self._load_compliance_framework_info()
+        self._load_requirement_info()
 
         self._wait_random_time()
 
-        try:
-            check_results = self.aws_prowler_connector.check(
-                options, secret_data, schema
-            )
+        check_results, err_message = self.prowler_connector.check(
+            options, secret_data
+        )
 
-            # Return Cloud Service Type
-            cloud_service_type = CloudServiceType(
-                name=self.cloud_service_type, provider=self.provider
+        # Return compliance results (Cloud Services)
+        for compliance_result in self.make_compliance_results(check_results):
+            yield make_cloud_service(
+                name=compliance_result["name"],
+                cloud_service_type=self.cloud_service_type,
+                cloud_service_group=self.cloud_service_group,
+                provider=self.provider,
+                account=compliance_result["account"],
+                data=compliance_result,
+                region_code="global",
+                reference={
+                    "resource_id": compliance_result["reference"]["resource_id"],
+                },
+                data_format="grpc",
             )
-            cloud_service_type.metadata["query_sets"][0][
-                "name"
-            ] = f"AWS {self.cloud_service_type}"
-            yield self.make_response(
-                cloud_service_type.dict(),
-                {"1": ["name", "group", "provider"]},
-                resource_type="inventory.CloudServiceType",
-            )
-
-            # Return compliance results (Cloud Services)
-            for compliance_result in self.make_compliance_results(check_results):
-                yield self.make_response(
-                    compliance_result,
-                    {
-                        "1": [
-                            "reference.resource_id",
-                            "provider",
-                            "cloud_service_type",
-                            "cloud_service_group",
-                            "account",
-                        ]
-                    },
-                )
-
-        except Exception as e:
-            yield self.error_response(e)
+        if err_message:
+            _LOGGER.error(f"[{self.__repr__()}.prowler_connector.check] Error: {err_message}")
+            raise Exception(err_message)
 
     def make_compliance_results(self, check_results: List[dict]) -> List[dict]:
         compliance_results = {}
         for check_result in check_results:
-            account = check_result["AccountId"]
-            requirements = check_result.get("Compliance", {}).get(
+            check_id = check_result["metadata"]["event_code"]
+            account = check_result["cloud"]["account"]["uid"]
+            requirements = check_result["unmapped"].get("compliance", {}).get(
                 self.cloud_service_type, []
             )
             for requirement_id in requirements:
-                compliance_id = f"prowler:aws:{account}:{self.cloud_service_type}:{requirement_id}".lower()
-                check_id = check_result["CheckID"]
-                status = check_result["Status"]
-                region_code = check_result["Region"]
-                severity = _SEVERITY_MAP.get(check_result["Severity"], "UNKNOWN")
-                score = _SEVERITY_SCORE_MAP[severity]
+                requirement_seq = next(
+                    (requirement['Requirement_Seq']
+                     for requirement in self.requirement_info[self.cloud_service_type]['Requirements']
+                     if requirement['Id'] == requirement_id and check_id in requirement['Checks']
+                     ),
+                    None
+                )
+
+                compliance_id = (
+                    f"prowler:{self.provider}:{account}:{self.cloud_service_type}:{requirement_id}:" 
+                    f"{str(requirement_seq)}"
+                ).lower()
+                status = check_result["status_code"]
+                region_code = check_result["cloud"]["region"]
+                severity = SEVERITY_MAP.get(check_result["severity"], "UNKNOWN")
+                score = SEVERITY_SCORE_MAP[severity]
 
                 if compliance_id not in compliance_results:
                     compliance_results[
                         compliance_id
                     ] = self._make_base_compliance_result(
-                        compliance_id, requirement_id, severity, check_result
+                        compliance_id, requirement_id, requirement_seq, check_id, severity, check_result
                     )
 
                 check_exists = (
-                    check_id in compliance_results[compliance_id]["data"]["checks"]
+                        check_id in compliance_results[compliance_id]["data"]["checks"]
                 )
 
                 if compliance_results[compliance_id]["region_code"] != region_code:
@@ -190,6 +200,27 @@ class AWSProwlerManager(CollectorManager):
 
             results.append(compliance_result)
 
+        compliance_ids = {}
+        for key in compliance_results.keys():
+            _, _, account, _, _, requirement_seq = key.split(":")
+            if account not in compliance_ids:
+                compliance_ids[account] = []
+            compliance_ids[account].append(requirement_seq)
+
+        for account in compliance_ids.keys():
+            for requirement in self.requirement_info[self.cloud_service_type]['Requirements']:
+                if str(requirement['Requirement_Seq']) not in compliance_ids.get(account, []):
+                    compliance_id = (
+                        f"prowler:{self.provider}:{account}:{self.cloud_service_type}:{requirement['Id']}:"
+                        f"{str(requirement['Requirement_Seq'])}"
+                    ).lower()
+                    compliance_results[
+                        compliance_id
+                    ] = self._make_base_compliance_result(
+                        compliance_id, requirement['Id'], requirement['Requirement_Seq'], None, None, None
+                    )
+                    results.append(compliance_results[compliance_id])
+
         return results
 
     @staticmethod
@@ -224,21 +255,21 @@ class AWSProwlerManager(CollectorManager):
 
     @staticmethod
     def _update_severity(old_severity: str, new_severity: str) -> str:
-        if _SEVERITY_SCORE_MAP[old_severity] < _SEVERITY_SCORE_MAP[new_severity]:
+        if SEVERITY_SCORE_MAP[old_severity] < SEVERITY_SCORE_MAP[new_severity]:
             return new_severity
         return old_severity
 
     def _make_check(self, check_result: dict) -> dict:
         check = {
-            "check_id": check_result["CheckID"],
-            "check_title": check_result["CheckTitle"],
-            "service": check_result["ServiceName"],
-            "sub_service": check_result["SubServiceName"],
-            "check_type": check_result["CheckType"],
+            "check_id": check_result["metadata"]["event_code"],
+            "check_title": check_result["finding_info"]["title"],
+            "service": check_result["resources"][0]["group"]["name"],
+            "sub_service": "",
+            "check_type": check_result["unmapped"]["check_type"],
             "status": "PASS",
-            "severity": _SEVERITY_MAP.get(check_result["Severity"], "UNKNOWN"),
-            "risk": check_result["Risk"],
-            "remediation": self._make_remediation(check_result["Remediation"]),
+            "severity": SEVERITY_MAP.get(check_result["severity"], "UNKNOWN"),
+            "risk": check_result["risk_details"],
+            "remediation": self._make_remediation(check_result["remediation"]),
             "stats": {
                 "score": {"pass": 0, "fail": 0, "percent": 0},
                 "findings": {
@@ -254,23 +285,22 @@ class AWSProwlerManager(CollectorManager):
 
     @staticmethod
     def _make_remediation(remediation_info):
-        recommendation = remediation_info.get("Recommendation", {})
         return {
-            "description": recommendation.get("Text", ""),
-            "link": recommendation.get("Url", ""),
+            "description": remediation_info.get("desc", ""),
+            "link": remediation_info["references"],
         }
 
     @staticmethod
     def _make_finding(check_result: dict) -> dict:
         return {
-            "finding_id": check_result["FindingUniqueId"],
-            "check_id": check_result["CheckID"],
-            "check_title": check_result["CheckTitle"],
-            "status": check_result["Status"],
-            "status_extended": check_result["StatusExtended"],
-            "resource": check_result["ResourceId"] or check_result["ResourceArn"],
-            "resource_type": check_result["ResourceType"],
-            "region_code": check_result["Region"],
+            "finding_id": check_result["finding_info"]["uid"],
+            "check_id": check_result["metadata"]["event_code"],
+            "check_title": check_result["finding_info"]["title"],
+            "status": check_result["status_code"],
+            "status_extended": check_result["status_detail"],
+            "resource": check_result["resources"][0]["name"] or check_result["resources"][0]["uid"],
+            "resource_type": check_result["resources"][0]["type"],
+            "region_code": check_result["cloud"]["region"],
         }
 
     @staticmethod
@@ -322,19 +352,31 @@ class AWSProwlerManager(CollectorManager):
         return compliance_result_data
 
     def _make_base_compliance_result(
-        self, compliance_id: str, requirement_id: str, severity: str, check_result: dict
+            self, compliance_id: str, requirement_id: str, requirement_seq: int, check_id: str, severity: str,
+            check_result: dict
     ) -> dict:
+        requirement_name, supported, requirement_skip = next(
+            ((requirement['Description'], requirement['Supported'], requirement['Skip'])
+             for requirement in self.requirement_info[self.cloud_service_type]['Requirements']
+             if requirement['Requirement_Seq'] == requirement_seq
+             ),
+            (None, None, None)
+        )
+        account = compliance_id.split(":")[2]
+
         compliance_result = {
-            "name": self.compliance_framework_info[requirement_id],
+            "name": requirement_name,
             "reference": {
                 "resource_id": compliance_id,
             },
+            "requirement_seq": requirement_seq,
+            "supported": supported,
             "data": {
                 "requirement_id": requirement_id,
-                "description": check_result["Description"],
-                "status": "PASS",
-                "severity": severity,
-                "service": check_result["ServiceName"],
+                "description": check_result["finding_info"]["desc"] if check_id else "",
+                "status": "SKIP" if requirement_skip else ("PASS" if check_id else "UNKNOWN"),
+                "severity": severity if check_id else "",
+                "service": check_result["resources"][0]["group"]["name"] if check_id else "",
                 "checks": {},
                 "findings": [],
                 "display": {
@@ -373,11 +415,11 @@ class AWSProwlerManager(CollectorManager):
                     }
                 }
             },
-            "account": check_result["AccountId"],
+            "account": account,
             "provider": self.provider,
             "cloud_service_group": self.cloud_service_group,
             "cloud_service_type": self.cloud_service_type,
-            "region_code": check_result["Region"],
+            "region_code": check_result["cloud"]["region"] if check_id else "global",
         }
 
         return compliance_result
@@ -390,16 +432,32 @@ class AWSProwlerManager(CollectorManager):
         time.sleep(random_time)
 
     def _check_compliance_framework(self):
-        all_compliance_frameworks = list(COMPLIANCE_FRAMEWORKS["aws"].keys())
+        all_compliance_frameworks = list(COMPLIANCE_FRAMEWORKS[self.provider].keys())
         if self.cloud_service_type not in all_compliance_frameworks:
             raise ERROR_INVALID_PARAMETER(
                 key="options.compliance_framework",
                 reason=f"Not supported compliance framework. "
-                f"(compliance_frameworks = {all_compliance_frameworks})",
+                       f"(compliance_frameworks = {all_compliance_frameworks})",
             )
 
-    def _load_compliance_framework_info(self):
-        compliance_framework = COMPLIANCE_FRAMEWORKS["aws"][self.cloud_service_type]
-        compliance_frameworks = bulk_load_compliance_frameworks(self.provider)
-        for requirement in compliance_frameworks[compliance_framework].Requirements:
-            self.compliance_framework_info[requirement.Id] = requirement.Description
+    def _load_requirement_info(self):
+        frameworks = {}
+        compliance_framework = COMPLIANCE_FRAMEWORKS[self.provider][self.cloud_service_type]
+        compliance_frameworks = bulk_load_compliance_frameworks(
+            self.provider if self.provider != "google_cloud" else "gcp"
+        )
+        sorted_requirements = natsorted(compliance_frameworks[compliance_framework].Requirements,
+                                        key=lambda x: (x.Id, x.Description))
+        frameworks[self.cloud_service_type] = json.loads(compliance_frameworks[compliance_framework].json())
+        frameworks[self.cloud_service_type]['Requirements'] = []
+
+        for i, requirement in enumerate(sorted_requirements):
+            requirement_json = json.loads(requirement.json())
+            requirement_checks = requirement_json.get('Checks', [])
+            requirement_json['Requirement_Seq'] = i + 1
+            requirement_json['Supported'] = bool(requirement_checks)
+            requirement_json['Skip'] = not requirement_checks or (
+                    bool(self.checklist) and not bool(set(self.checklist) & set(requirement_checks)))
+            frameworks[self.cloud_service_type]['Requirements'].append(requirement_json)
+
+        self.requirement_info = frameworks

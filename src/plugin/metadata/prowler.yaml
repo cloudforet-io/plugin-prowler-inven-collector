@@ -1,0 +1,249 @@
+query_sets:
+- name: Prowler
+  query_options:
+    fields:
+      compliance_count:
+        operator: count
+      fail_check_count:
+        key: data.stats.checks.fail
+        operator: sum
+      fail_finding_count:
+        key: data.stats.findings.fail
+        operator: sum
+      fail_score:
+        key: data.stats.score.fail
+        operator: sum
+      info_check_count:
+        key: data.stats.checks.info
+        operator: sum
+      info_finding_count:
+        key: data.stats.findings.info
+        operator: sum
+      pass_check_count:
+        key: data.stats.checks.pass
+        operator: sum
+      pass_finding_count:
+        key: data.stats.findings.pass
+        operator: sum
+      pass_score:
+        key: data.stats.score.pass
+        operator: sum
+    group_by:
+    - data.status
+    - data.severity
+    - data.service
+  unit:
+    fail_score: '%'
+    pass_score: '%'
+
+search:
+  fields:
+    - Requirement ID: data.requirement_id
+    - Status: data.status
+      type: text
+      labels:
+        - PASS: "PASS"
+        - FAIL: "FAIL"
+        - INFO: "INFO"
+        - SKIP: "SKIP"
+        - UNKNOWN: "UNKNOWN"
+    - Compliance Score: data.stats.score.percent
+      type: float
+    - Severity: data.severity
+      type: text
+      labels:
+        - CRITICAL: "CRITICAL"
+        - HIGH: "HIGH"
+        - MEDIUM: "MEDIUM"
+        - LOW: "LOW"
+        - INFORMATIONAL: "INFORMATIONAL"
+    - Service: data.service
+
+table:
+  type: query-search-table
+  sort:
+    key: requirement_seq
+    desc: false
+  fields:
+    - Name: name
+    - Requirement ID: data.requirement_id
+    - Requirement Seq: requirement_seq
+      is_optional: true
+    - Description: data.description
+      is_optional: true
+    - Supported: supported
+      type: boolean
+    - Status: data.status
+      type: enum
+      enums:
+        - FAIL: coral.500
+          type: badge
+        - INFO: peacock.500
+          type: badge
+        - PASS: indigo.500
+          type: badge
+        - SKIP: peacock.500
+          type: badge
+        - UNKNOWN: gray.500
+          type: badge
+    - Findings: data.display.findings
+      sortable: false
+    - Checks: data.display.checks
+      is_optional: true
+      sortable: false
+    - Compliance Score: data.stats.score.percent
+      is_optional: true
+    - Severity: data.severity
+    - Service: data.service
+
+widget:
+  - name: Total Count
+    options:
+      value_options:
+        key: value
+        options:
+          default: 0.0
+    query:
+      aggregate:
+      - count:
+          name: value
+      filter: []
+    type: summary
+  - name: Failed Count
+    options:
+      value_options:
+        key: value
+        options:
+          default: 0.0
+    query:
+      aggregate:
+      - count:
+          name: value
+      filter:
+      - key: data.status
+        operator: eq
+        value: FAIL
+    type: summary
+
+tabs.0:
+  name: Checks
+  type: query-search-table
+  sort:
+    key: data.checks.status
+    desc: false
+  root_path: data.checks
+  fields:
+    - Requirement ID: data.requirement_id
+    - Check Title: data.checks.check_title
+    - Supported: supported
+      type: boolean
+    - Status: data.checks.status
+      type: enum
+      enums:
+        - FAIL: coral.500
+          label: FAIL
+          type: badge
+        - INFO: peacock.500
+          label: INFO
+          type: badge
+        - PASS: indigo.500
+          label: PASS
+          type: badge
+        - SKIP: peacock.500
+          type: badge
+        - UNKNOWN: gray.500
+          type: badge
+    - Findings: data.checks.display.findings
+      sortable: false
+    - Severity: data.checks.severity
+    - Service: data.checks.service
+    - Risk: data.checks.risk
+    - Remediation: data.checks.remediation.description
+  search:
+    - key: data.requirement_id
+      name: Requirement ID
+    - key: data.checks.check_title
+      name: Check Title
+    - key: data.checks.status
+      name: Status
+      enums:
+        FAIL:
+          label: FAIL
+        PASS:
+          label: PASS
+        INFO:
+          label: INFO
+    - key: data.checks.severity
+      name: Severity
+      enums:
+        CRITICAL:
+          label: CRITICAL
+        HIGH:
+          label: HIGH
+        MEDIUM:
+          label: MEDIUM
+        LOW:
+          label: LOW
+        INFORMATIONAL:
+          label: INFORMATIONAL
+    - key: data.checks.service
+      name: Service
+
+tabs.1:
+  name: Findings
+  sort:
+    key: data.findings.status
+    desc: false
+  type: query-search-table
+  root_path: data.findings
+  fields:
+    - Requirement ID: data.requirement_id
+    - Check Title: data.findings.check_title
+    - Supported: supported
+      type: boolean
+    - Status: data.findings.status
+      type: enum
+      enums:
+        - FAIL: coral.500
+          label: FAIL
+          type: badge
+        - INFO: peacock.500
+          label: INFO
+          type: badge
+        - PASS: indigo.500
+          label: PASS
+          type: badge
+        - SKIP: peacock.500
+          type: badge
+        - UNKNOWN: gray.500
+          type: badge
+    - Resource Type: data.findings.resource_type
+    - Resource: data.findings.resource
+      reference:
+        reference_key: reference.resource_id
+        resource_type: inventory.CloudService
+    - Region: data.findings.region_code
+      reference:
+        reference_key: region_code
+        resource_type: inventory.Region
+    - Status Extended: data.findings.status_extended
+  search:
+    - key: data.requirement_id
+      name: Requirement ID
+    - key: data.findings.check_title
+      name: Check Title
+    - key: data.findings.status
+      name: Status
+      enums:
+        FAIL:
+          label: FAIL
+        PASS:
+          label: PASS
+        INFO:
+          label: INFO
+    - key: data.findings.resource_type
+      name: Resource Type
+    - key: data.findings.resource
+      name: Resource
+    - key: data.findings.region_code
+      name: Region

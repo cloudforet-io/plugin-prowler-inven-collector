@@ -1,5 +1,5 @@
 #
-#   Copyright 2020 The Cloudforet Authors.
+#   Copyright 2020 The SpaceONE Authors.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,24 +16,26 @@
 
 from setuptools import setup, find_packages
 
-with open('VERSION', 'r') as f: 
+with open("VERSION", "r") as f:
     VERSION = f.read().strip()
     f.close()
 
 setup(
-    name='plugin-prowler-inven-collector',
+    name="plugin-prowler-inven-collector",
     version=VERSION,
-    description='Collector plugin forProwler',
-    long_description='',
-    url='https://cloudforet.io/',
-    author='Cloudforet Admin',
-    author_email='admin@cloudforet.io',
-    license='Apache License 2.0',
+    description="Collector plugin forProwler",
+    long_description="",
+    url="https://www.spaceone.dev/",
+    author="MEGAZONE SpaceONE Team",
+    author_email="admin@spaceone.dev",
+    license="Apache License 2.0",
     packages=find_packages(),
     install_requires=[
-        'spaceone-core',
-        'spaceone-api',
-        'prowler==3.15.3',
+        "spaceone-api",
+        "spaceone-core",
+        "prowler==4.3.3",
+        "natsort"
     ],
+    package_data={"plugin": ["metadata/*.yaml"]},
     zip_safe=False,
 )
