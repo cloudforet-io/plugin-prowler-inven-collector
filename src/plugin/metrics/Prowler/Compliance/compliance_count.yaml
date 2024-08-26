@@ -1,0 +1,43 @@
+---
+metric_id: metric-prowler-compliance
+name: Compliance Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:Prowler.Compliance
+query_options:
+  fields:
+    compliance_count:
+      operator: count
+    fail_check_count:
+      key: data.stats.checks.fail
+      operator: sum
+    fail_finding_count:
+      key: data.stats.findings.fail
+      operator: sum
+    fail_score:
+      key: data.stats.score.fail
+      operator: sum
+    info_check_count:
+      key: data.stats.checks.info
+      operator: sum
+    info_finding_count:
+      key: data.stats.findings.info
+      operator: sum
+    pass_check_count:
+      key: data.stats.checks.pass
+      operator: sum
+    pass_finding_count:
+      key: data.stats.findings.pass
+      operator: sum
+    pass_score:
+      key: data.stats.score.pass
+      operator: sum
+  group_by:
+  - key: data.status
+    name: Status
+  - key: data.severity
+    name: Severity
+  - key: data.service
+    name: Service
+unit: Count
+namespace_id: ns-prowler-compliance
+version: '1.0'
