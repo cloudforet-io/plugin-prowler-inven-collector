@@ -1,0 +1,8 @@
+---
+namespace_id: ns-prowler-compliance
+name: Prowler/Compliance
+category: ASSET
+resource_type: inventory.CloudService:Prowler.Compliance
+group: Prowler
+icon: 'https://spaceone-custom-assets.s3.ap-northeast-2.amazonaws.com/console-assets/icons/prowler.svg'
+version: '1.0'
