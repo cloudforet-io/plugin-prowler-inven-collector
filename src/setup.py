@@ -36,6 +36,6 @@ setup(
         "prowler==4.3.3",
         "natsort"
     ],
-    package_data={"plugin": ["metadata/*.yaml"]},
+    package_data={"plugin": ["metadata/*.yaml", "metrics/**/**/*.yaml"]},
     zip_safe=False,
 )
