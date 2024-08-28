@@ -44,26 +44,26 @@ class ResourceManager(BaseManager):
 
             if self.provider == "aws":
                 self.is_primary = True
-                self.name = f"AWS {self.cloud_service_type}"
+                self.name = f"{self.cloud_service_type}"
             elif self.provider == "azure":
-                self.name = f"Azure {self.cloud_service_type}"
+                self.name = f"{self.cloud_service_type}"
             elif self.provider == "google_cloud":
-                self.name = f"Google Cloud {self.cloud_service_type}"
+                self.name = f"{self.cloud_service_type}"
             else:
                 raise ERROR_INVALID_PARAMETER(
                     key="options.provider", reason="Not supported provider."
                 )
 
             _LOGGER.debug(f"[{self.__repr__()}] Collect cloud service type: "
-                          f"{self.cloud_service_group} > {self.provider}_{self.cloud_service_type}")
+                          f"{self.cloud_service_group} > {self.cloud_service_type}")
             yield self.get_cloud_service_type()
 
             _LOGGER.debug(f"[{self.__repr__()}] Collect metrics: "
-                          f"{self.cloud_service_group} > {self.provider}_{self.cloud_service_type}")
+                          f"{self.cloud_service_group} > {self.cloud_service_type}")
             yield from self.collect_metrics()
 
             _LOGGER.debug(f"[{self.__repr__()}] Collect cloud services: "
-                          f"{self.cloud_service_group} > {self.provider}_{self.cloud_service_type}")
+                          f"{self.cloud_service_group} > {self.cloud_service_type}")
             response_iterator = self.collect_cloud_services(options, secret_data, schema)
             for response in response_iterator:
                 try:
