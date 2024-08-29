@@ -24,7 +24,6 @@ class ProwlerManager(ResourceManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.name = None
         self.provider = None
         self.cloud_service_group = "Prowler"
         self.cloud_service_type = None
@@ -47,15 +46,6 @@ class ProwlerManager(ResourceManager):
 
         if self.provider == "aws":
             self.is_primary = True
-            self.name = f"{self.cloud_service_type}"
-        elif self.provider == "azure":
-            self.name = f"{self.cloud_service_type}"
-        elif self.provider == "google_cloud":
-            self.name = f"{self.cloud_service_type}"
-        else:
-            yield ERROR_INVALID_PARAMETER(
-                key="options.provider", reason="Not supported provider."
-            )
 
         self.checklist = options.get("check_list")
         self.prowler_connector = ProwlerConnector()
@@ -369,10 +359,10 @@ class ProwlerManager(ResourceManager):
             "reference": {
                 "resource_id": compliance_id,
             },
-            "requirement_seq": requirement_seq,
-            "supported": supported,
             "data": {
                 "requirement_id": requirement_id,
+                "requirement_seq": requirement_seq,
+                "supported": supported,
                 "description": check_result["finding_info"]["desc"] if check_id else "",
                 "status": "SKIP" if requirement_skip else ("PASS" if check_id else "UNKNOWN"),
                 "severity": severity if check_id else "",
