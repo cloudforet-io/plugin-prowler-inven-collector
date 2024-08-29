@@ -60,19 +60,20 @@ class ProwlerManager(ResourceManager):
 
         # Return compliance results (Cloud Services)
         for compliance_result in self.make_compliance_results(check_results):
-            yield make_cloud_service(
-                name=compliance_result["name"],
-                cloud_service_type=self.cloud_service_type,
-                cloud_service_group=self.cloud_service_group,
-                provider=self.provider,
-                account=compliance_result["account"],
-                data=compliance_result,
-                region_code="global",
-                reference={
-                    "resource_id": compliance_result["reference"]["resource_id"],
-                },
-                data_format="grpc",
-            )
+            yield compliance_result
+            # yield make_cloud_service(
+            #     name=compliance_result["name"],
+            #     cloud_service_type=self.cloud_service_type,
+            #     cloud_service_group=self.cloud_service_group,
+            #     provider=self.provider,
+            #     account=compliance_result["account"],
+            #     data=compliance_result,
+            #     region_code="global",
+            #     reference={
+            #         "resource_id": compliance_result["reference"]["resource_id"],
+            #     },
+            #     data_format="grpc",
+            # )
         if err_message:
             _LOGGER.error(f"[{self.__repr__()}.prowler_connector.check] Error: {err_message}")
             raise Exception(err_message)
