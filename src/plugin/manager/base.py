@@ -23,7 +23,6 @@ class ResourceManager(BaseManager):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.name = None
         self.provider = None
         self.cloud_service_group = "Prowler"
         self.cloud_service_type = None
@@ -44,15 +43,6 @@ class ResourceManager(BaseManager):
 
             if self.provider == "aws":
                 self.is_primary = True
-                self.name = f"{self.cloud_service_type}"
-            elif self.provider == "azure":
-                self.name = f"{self.cloud_service_type}"
-            elif self.provider == "google_cloud":
-                self.name = f"{self.cloud_service_type}"
-            else:
-                raise ERROR_INVALID_PARAMETER(
-                    key="options.provider", reason="Not supported provider."
-                )
 
             _LOGGER.debug(f"[{self.__repr__()}] Collect cloud service type: "
                           f"{self.cloud_service_group} > {self.cloud_service_type}")
@@ -104,7 +94,7 @@ class ResourceManager(BaseManager):
 
     def get_cloud_service_type(self) -> dict:
         cloud_service_type = make_cloud_service_type(
-            name=self.name,
+            name=self.cloud_service_type,
             group=self.cloud_service_group,
             provider=self.provider,
             metadata_path=self.metadata_path,

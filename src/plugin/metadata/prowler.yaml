@@ -24,16 +24,15 @@ search:
 table:
   type: query-search-table
   sort:
-    key: requirement_seq
+    key: data.requirement_seq
     desc: false
   fields:
-    - Name: name
     - Requirement ID: data.requirement_id
-    - Requirement Seq: requirement_seq
+    - Requirement Seq: data.requirement_seq
       is_optional: true
     - Description: data.description
       is_optional: true
-    - Supported: supported
+    - Supported: data.supported
       type: boolean
     - Status: data.status
       type: enum
@@ -97,7 +96,7 @@ tabs.0:
   fields:
     - Requirement ID: data.requirement_id
     - Check Title: data.checks.check_title
-    - Supported: supported
+    - Supported: data.supported
       type: boolean
     - Status: data.checks.status
       type: enum
@@ -161,7 +160,7 @@ tabs.1:
   fields:
     - Requirement ID: data.requirement_id
     - Check Title: data.findings.check_title
-    - Supported: supported
+    - Supported: data.supported
       type: boolean
     - Status: data.findings.status
       type: enum
