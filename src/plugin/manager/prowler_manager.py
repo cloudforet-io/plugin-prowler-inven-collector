@@ -47,11 +47,11 @@ class ProwlerManager(ResourceManager):
 
         if self.provider == "aws":
             self.is_primary = True
-            self.name = f"AWS {self.cloud_service_type}"
+            self.name = f"{self.cloud_service_type}"
         elif self.provider == "azure":
-            self.name = f"Azure {self.cloud_service_type}"
+            self.name = f"{self.cloud_service_type}"
         elif self.provider == "google_cloud":
-            self.name = f"Google Cloud {self.cloud_service_type}"
+            self.name = f"{self.cloud_service_type}"
         else:
             yield ERROR_INVALID_PARAMETER(
                 key="options.provider", reason="Not supported provider."
