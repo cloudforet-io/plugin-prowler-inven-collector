@@ -32,7 +32,7 @@ table:
       is_optional: true
     - Description: data.description
       is_optional: true
-    - Supported: data.supported
+    - Supported by: data.supported
       type: boolean
     - Status: data.status
       type: enum
@@ -57,42 +57,12 @@ table:
     - Severity: data.severity
     - Service: data.service
 
-widget:
-  - name: Total Count
-    options:
-      value_options:
-        key: value
-        options:
-          default: 0.0
-    query:
-      aggregate:
-      - count:
-          name: value
-      filter: []
-    type: summary
-  - name: Failed Count
-    options:
-      value_options:
-        key: value
-        options:
-          default: 0.0
-    query:
-      aggregate:
-      - count:
-          name: value
-      filter:
-      - key: data.status
-        operator: eq
-        value: FAIL
-    type: summary
-
 tabs.0:
   name: Checks
   type: query-search-table
   sort:
     key: data.checks.status
     desc: false
-  root_path: data.checks
   fields:
     - Requirement ID: data.requirement_id
     - Check Title: data.checks.check_title
@@ -134,6 +104,10 @@ tabs.0:
           label: PASS
         INFO:
           label: INFO
+        SKIP:
+          label: SKIP
+        UNKNOWN:
+          label: UNKNOWN
     - key: data.checks.severity
       name: Severity
       enums:
@@ -156,7 +130,6 @@ tabs.1:
     key: data.findings.status
     desc: false
   type: query-search-table
-  root_path: data.findings
   fields:
     - Requirement ID: data.requirement_id
     - Check Title: data.findings.check_title
