@@ -346,8 +346,8 @@ class ProwlerManager(ResourceManager):
             self, compliance_id: str, requirement_id: str, requirement_seq: int, check_id: str, severity: str,
             check_result: dict
     ) -> dict:
-        requirement_name, supported, requirement_skip = next(
-            ((requirement['Description'], requirement['Supported'], requirement['Skip'])
+        requirement_name, automation, requirement_skip = next(
+            ((requirement['Description'], requirement['Automation'], requirement['Skip'])
              for requirement in self.requirement_info[self.cloud_service_type]['Requirements']
              if requirement['Requirement_Seq'] == requirement_seq
              ),
@@ -363,7 +363,7 @@ class ProwlerManager(ResourceManager):
             "data": {
                 "requirement_id": requirement_id,
                 "requirement_seq": requirement_seq,
-                "supported": supported,
+                "automation": automation,
                 "description": check_result["finding_info"]["desc"] if check_id else "",
                 "status": "SKIP" if requirement_skip else ("PASS" if check_id else "UNKNOWN"),
                 "severity": severity if check_id else "",
@@ -446,7 +446,7 @@ class ProwlerManager(ResourceManager):
             requirement_json = json.loads(requirement.json())
             requirement_checks = requirement_json.get('Checks', [])
             requirement_json['Requirement_Seq'] = i + 1
-            requirement_json['Supported'] = bool(requirement_checks)
+            requirement_json['Automation'] = bool(requirement_checks)
             requirement_json['Skip'] = not requirement_checks or (
                     bool(self.checklist) and not bool(set(self.checklist) & set(requirement_checks)))
             frameworks[self.cloud_service_type]['Requirements'].append(requirement_json)
