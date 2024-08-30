@@ -32,7 +32,7 @@ table:
       is_optional: true
     - Description: data.description
       is_optional: true
-    - Supported by: data.supported
+    - Automation: data.automation
       type: boolean
     - Status: data.status
       type: enum
@@ -66,8 +66,6 @@ tabs.0:
   fields:
     - Requirement ID: data.requirement_id
     - Check Title: data.checks.check_title
-    - Supported: data.supported
-      type: boolean
     - Status: data.checks.status
       type: enum
       enums:
@@ -133,8 +131,6 @@ tabs.1:
   fields:
     - Requirement ID: data.requirement_id
     - Check Title: data.findings.check_title
-    - Supported: data.supported
-      type: boolean
     - Status: data.findings.status
       type: enum
       enums:
