@@ -33,7 +33,7 @@ table:
     - Description: data.description
       is_optional: true
     - Automation: data.automation
-      type: boolean
+      data_type: boolean
     - Status: data.status
       type: enum
       enums:
@@ -78,9 +78,8 @@ tabs.0:
         - PASS: indigo.500
           label: PASS
           type: badge
-        - SKIP: peacock.500
-          type: badge
-        - UNKNOWN: gray.500
+        - MANUAL: peacock.500
+          label: MANUAL
           type: badge
     - Findings: data.checks.display.findings
       sortable: false
@@ -102,10 +101,8 @@ tabs.0:
           label: PASS
         INFO:
           label: INFO
-        SKIP:
-          label: SKIP
-        UNKNOWN:
-          label: UNKNOWN
+        MANUAL:
+          label: MANUAL
     - key: data.checks.severity
       name: Severity
       enums:
@@ -143,9 +140,8 @@ tabs.1:
         - PASS: indigo.500
           label: PASS
           type: badge
-        - SKIP: peacock.500
-          type: badge
-        - UNKNOWN: gray.500
+        - MANUAL: peacock.500
+          label: MANUAL
           type: badge
     - Resource Type: data.findings.resource_type
     - Resource: data.findings.resource
@@ -171,6 +167,8 @@ tabs.1:
           label: PASS
         INFO:
           label: INFO
+        MANUAL:
+          label: MANUAL
     - key: data.findings.resource_type
       name: Resource Type
     - key: data.findings.resource
