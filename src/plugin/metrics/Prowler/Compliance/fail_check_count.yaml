@@ -2,7 +2,7 @@
 metric_id: metric-prowler-fail-check
 name: Fail check Count
 metric_type: GAUGE
-resource_type: inventory.CloudService:Prowler.Compliance
+resource_type: inventory.CloudService
 query_options:
   fields:
     value:
@@ -11,7 +11,6 @@ query_options:
   group_by:
   - key: data.status
     name: Status
-    default: true
   - key: data.severity
     name: Severity
   - key: data.service
