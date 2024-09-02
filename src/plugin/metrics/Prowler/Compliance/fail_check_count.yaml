@@ -1,0 +1,21 @@
+---
+metric_id: metric-prowler-fail-check
+name: Fail check Count
+metric_type: GAUGE
+resource_type: inventory.CloudService:Prowler.Compliance
+query_options:
+  fields:
+    value:
+      key: data.stats.checks.fail
+      operator: sum
+  group_by:
+  - key: data.status
+    name: Status
+    default: true
+  - key: data.severity
+    name: Severity
+  - key: data.service
+    name: Service
+unit: Count
+namespace_id: ns-prowler-compliance
+version: '1.0'
