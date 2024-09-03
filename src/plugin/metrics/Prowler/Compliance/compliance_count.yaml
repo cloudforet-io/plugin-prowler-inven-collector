@@ -2,7 +2,7 @@
 metric_id: metric-prowler-compliance
 name: Compliance Count
 metric_type: GAUGE
-resource_type: inventory.CloudService:Prowler.Compliance
+resource_type: inventory.CloudService:aws.Prowler.CIS-2.0
 query_options:
   fields:
     value:
