@@ -2,7 +2,7 @@
 metric_id: metric-prowler-fail-check
 name: Fail check Count
 metric_type: GAUGE
-resource_type: inventory.CloudService
+resource_type: inventory.CloudService:Prowler.Compliance
 query_options:
   fields:
     value:
