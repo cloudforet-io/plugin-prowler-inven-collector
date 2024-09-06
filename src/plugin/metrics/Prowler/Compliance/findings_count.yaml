@@ -1,21 +1,23 @@
 ---
-metric_id: metric-prowler-compliance-count
-name: Compliance Count
+metric_id: metric-prowler-findings-count
+name: Findings Count
 metric_type: GAUGE
 resource_type: inventory.CloudService
 query_options:
+  unwind:
+    path: data.findings
   fields:
     value:
       operator: count
   group_by:
   - key: cloud_service_type
     name: Compliance Framework
-  - key: data.status
+  - key: data.findings.status
     name: Status
-  - key: data.severity
-    name: Severity
-  - key: data.service
-    name: Service
+  - key: data.findings.region_code
+    name: Region
+  - key: data.findings.resource_type
+    name: Resource Type
   filter:
   - key: cloud_service_group
     value: Prowler

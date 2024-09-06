@@ -125,10 +125,11 @@ tabs.1:
     key: data.findings.status
     desc: false
   type: query-search-table
+  root_path: data.findings
+  unwind: data.findings
   fields:
-    - Requirement ID: data.requirement_id
-    - Check Title: data.findings.check_title
-    - Status: data.findings.status
+    - Check Title: check_title
+    - Status: status
       type: enum
       enums:
         - FAIL: coral.500
@@ -143,19 +144,17 @@ tabs.1:
         - MANUAL: peacock.500
           label: MANUAL
           type: badge
-    - Resource Type: data.findings.resource_type
-    - Resource: data.findings.resource
+    - Resource Type: resource_type
+    - Resource: resource
       reference:
         reference_key: reference.resource_id
         resource_type: inventory.CloudService
-    - Region: data.findings.region_code
+    - Region: region_code
       reference:
         reference_key: region_code
         resource_type: inventory.Region
-    - Status Extended: data.findings.status_extended
+    - Status Extended: status_extended
   search:
-    - key: data.requirement_id
-      name: Requirement ID
     - key: data.findings.check_title
       name: Check Title
     - key: data.findings.status
