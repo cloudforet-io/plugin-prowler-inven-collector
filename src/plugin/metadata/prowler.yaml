@@ -7,7 +7,7 @@ search:
         - PASS: "PASS"
         - FAIL: "FAIL"
         - INFO: "INFO"
-        - SKIP: "SKIP"
+        - UNSUPPORTED: "UNSUPPORTED"
         - UNKNOWN: "UNKNOWN"
     - Compliance Score: data.stats.score.percent
       type: float
@@ -34,6 +34,7 @@ table:
       is_optional: true
     - Automation: data.automation
       data_type: boolean
+      is_optional: true
     - Status: data.status
       type: enum
       enums:
@@ -43,7 +44,7 @@ table:
           type: badge
         - PASS: indigo.500
           type: badge
-        - SKIP: peacock.500
+        - UNSUPPORTED: peacock.500
           type: badge
         - UNKNOWN: gray.500
           type: badge
@@ -63,10 +64,11 @@ tabs.0:
   sort:
     key: data.checks.status
     desc: false
+  root_path: data.checks
+  unwind: data.checks
   fields:
-    - Requirement ID: data.requirement_id
-    - Check Title: data.checks.check_title
-    - Status: data.checks.status
+    - Check Title: check_title
+    - Status: status
       type: enum
       enums:
         - FAIL: coral.500
@@ -81,15 +83,13 @@ tabs.0:
         - MANUAL: peacock.500
           label: MANUAL
           type: badge
-    - Findings: data.checks.display.findings
+    - Findings: display.findings
       sortable: false
-    - Severity: data.checks.severity
-    - Service: data.checks.service
-    - Risk: data.checks.risk
-    - Remediation: data.checks.remediation.description
+    - Severity: severity
+    - Service: service
+    - Risk: risk
+    - Remediation: remediation.description
   search:
-    - key: data.requirement_id
-      name: Requirement ID
     - key: data.checks.check_title
       name: Check Title
     - key: data.checks.status
