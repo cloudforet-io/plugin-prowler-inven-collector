@@ -19,9 +19,9 @@ query_options:
   - key: data.findings.resource_type
     name: Resource Type
   filter:
-  - k: cloud_service_group
-    v: "Prowler"
-    o: match
+  - key: cloud_service_group
+    value: Prowler
+    operator: eq
 unit: Count
 namespace_id: ns-prowler-compliance
 version: '1.0'
