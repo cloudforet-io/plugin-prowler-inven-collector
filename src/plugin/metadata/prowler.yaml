@@ -7,6 +7,7 @@ search:
         - PASS: "PASS"
         - FAIL: "FAIL"
         - INFO: "INFO"
+        - MANUAL: "MANUAL"
         - UNSUPPORTED: "UNSUPPORTED"
         - UNKNOWN: "UNKNOWN"
     - Compliance Score: data.stats.score.percent
@@ -41,6 +42,8 @@ table:
         - FAIL: coral.500
           type: badge
         - INFO: peacock.500
+          type: badge
+        - MANUAL: peacock.500
           type: badge
         - PASS: indigo.500
           type: badge
