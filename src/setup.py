@@ -33,7 +33,7 @@ setup(
     install_requires=[
         "spaceone-api",
         "spaceone-core",
-        "prowler==4.3.3",
+        "prowler==4.4",
         "natsort"
     ],
     package_data={"plugin": ["metadata/*.yaml", "metrics/**/**/*.yaml"]},

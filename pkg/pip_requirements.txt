@@ -1,4 +1,4 @@
 spaceone-core
 spaceone-api
-prowler==4.3.3
+prowler==4.4
 natsort

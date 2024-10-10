@@ -7,7 +7,8 @@ import logging
 from typing import Generator, List
 
 from natsort import natsorted
-from prowler.lib.check.check import bulk_load_compliance_frameworks, bulk_load_checks_metadata
+from prowler.lib.check.compliance_models import Compliance
+from prowler.lib.check.models import CheckMetadata
 from spaceone.inventory.plugin.collector.lib import make_cloud_service, make_error_response
 
 from plugin.error.custom import *
@@ -166,7 +167,7 @@ class ProwlerManager(ResourceManager):
                 total_check_count += 1
                 if check["status"] == "FAIL":
                     fail_check_count += 1
-                elif check["status"] == "INFO":
+                elif check["status"] == "INFO" or check["status"] == "MANUAL":
                     info_check_count += 1
                 else:
                     pass_check_count += 1
@@ -302,7 +303,7 @@ class ProwlerManager(ResourceManager):
             check["status"] = "FAIL"
             check["stats"]["score"]["fail"] += score
             check["stats"]["findings"]["fail"] += 1
-        elif status == "INFO":
+        elif status == "INFO" or status == "MANUAL":
             if check["status"] != "FAIL":
                 check["status"] = "INFO"
             check["stats"]["findings"]["info"] += 1
@@ -322,7 +323,7 @@ class ProwlerManager(ResourceManager):
             compliance_result_data["status"] = "FAIL"
             compliance_result_data["stats"]["score"]["fail"] += score
             compliance_result_data["stats"]["findings"]["fail"] += 1
-        elif status == "INFO":
+        elif status == "INFO" or status == "MANUAL":
             if compliance_result_data["status"] != "FAIL":
                 compliance_result_data["status"] = "INFO"
 
@@ -346,12 +347,12 @@ class ProwlerManager(ResourceManager):
             self, compliance_id: str, requirement_id: str, requirement_seq: int, check_id: str, severity: str,
             check_result: dict
     ) -> dict:
-        requirement_name, automation, requirement_unsupported = next(
-            ((requirement['Description'], requirement['Automation'], requirement['Unsupported'])
+        requirement_name, automation = next(
+            ((requirement['Description'], requirement['Automation'])
              for requirement in self.requirement_info[self.cloud_service_type]['Requirements']
              if requirement['Requirement_Seq'] == requirement_seq
              ),
-            (None, None, None)
+            (None, None)
         )
         account = compliance_id.split(":")[2]
 
@@ -365,7 +366,7 @@ class ProwlerManager(ResourceManager):
                 "requirement_seq": requirement_seq,
                 "automation": automation,
                 "description": check_result["finding_info"]["desc"] if check_id else "",
-                "status": "UNSUPPORTED" if requirement_unsupported else ("PASS" if check_id else "UNKNOWN"),
+                "status": "UNSUPPORTED" if not automation else ("PASS" if check_id else "UNKNOWN"),
                 "severity": severity if check_id else "",
                 "service": check_result["resources"][0]["group"]["name"] if check_id else "",
                 "checks": {},
@@ -434,7 +435,7 @@ class ProwlerManager(ResourceManager):
     def _load_requirement_info(self):
         frameworks = {}
         compliance_framework = COMPLIANCE_FRAMEWORKS[self.provider][self.cloud_service_type]
-        compliance_frameworks = bulk_load_compliance_frameworks(
+        compliance_frameworks = Compliance.get_bulk(
             self.provider if self.provider != "google_cloud" else "gcp"
         )
         sorted_requirements = natsorted(compliance_frameworks[compliance_framework].Requirements,
@@ -447,8 +448,6 @@ class ProwlerManager(ResourceManager):
             requirement_checks = requirement_json.get('Checks', [])
             requirement_json['Requirement_Seq'] = i + 1
             requirement_json['Automation'] = bool(requirement_checks)
-            requirement_json['Unsupported'] = not requirement_checks or (
-                    bool(self.checklist) and not bool(set(self.checklist) & set(requirement_checks)))
             frameworks[self.cloud_service_type]['Requirements'].append(requirement_json)
 
         self.requirement_info = frameworks

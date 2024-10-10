@@ -78,6 +78,8 @@ COMPLIANCE_FRAMEWORKS = {
         "FedRamp-Moderate-Revision-4": "fedramp_moderate_revision_4_aws",
         "FedRAMP-Low-Revision-4": "fedramp_low_revision_4_aws",
         "ISO27001-2013": "iso27001_2013_aws",
+        "KISA-ISMS-P-2023": "kisa_isms_p_2023_aws",
+        "KISA-ISMS-P-2023-korean": "kisa_isms_p_2023_korean_aws"
     },
     "google_cloud": {
         "CIS-2.0": "cis_2.0_gcp",
@@ -106,6 +108,7 @@ REGIONS = {
         "ap-southeast-2",
         "ap-southeast-3",
         "ap-southeast-4",
+        "ap-southeast-5",
         "ca-central-1",
         "ca-west-1",
         "cn-north-1",
@@ -153,6 +156,7 @@ SERVICES = {
         "ConfigService": "config",
         "DirectoryService": "directoryservice",
         "Data Lifecycle Manager": "dlm",
+        "Database Migration Service": "dms",
         "DocumentDB": "documentdb",
         "DRS": "drs",
         "DynamoDB": "dynamodb",
@@ -219,6 +223,7 @@ SERVICES = {
         "AKS (Azure Kubernetes Service)": "aks",
         "App": "app",
         "AppInsights": "appinsights",
+        "ContainerRegistry": "containerregistry",
         "CosmosDB": "cosmosdb",
         "Defender": "defender",
         "Entra": "entra",
