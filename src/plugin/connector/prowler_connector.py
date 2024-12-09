@@ -84,11 +84,15 @@ class ProwlerConnector(BaseConnector):
             last_message = re.sub(r'\x1b\[[0-9;]*m','',last_line)
 
             if 'there are no findings' in last_message.lower():
-                return {}, last_message
+                return [], last_message
             else:
                 output_json_file = os.path.join(temp_dir, "output.ocsf.json")
-                check_results = utils.load_json_from_file(output_json_file)
-                return check_results, err_message
+                if os.path.exists(output_json_file):
+                    check_results = utils.load_json_from_file(output_json_file)
+                    return check_results, err_message
+                else:
+                    return [], err_message
+
 
     @staticmethod
     def _command_prefix(provider: str, profile_name: str) -> List[str]:
