@@ -76,7 +76,7 @@ class ProwlerManager(ResourceManager):
             #     data_format="grpc",
             # )
         if err_message:
-            _LOGGER.error(f"[{self.__repr__()}.prowler_connector.check] Error: {err_message}")
+            _LOGGER.error(f"[{self.__repr__()}.collect_cloud_services] Error: {err_message}")
             raise Exception(err_message)
 
     def make_compliance_results(self, check_results: List[dict]) -> List[dict]:
