@@ -107,13 +107,12 @@ def _create_init_metadata(provider: str) -> dict:
 
 
 def _check_secret_data(provider: str, secret_data: dict) -> None:
-    match provider:
-        case "aws" | "azure" | "google_cloud":
-            missing_keys = [key for key in REQUIRED_SECRET_KEYS[provider] if key not in secret_data]
-            if missing_keys:
-                for key in missing_keys:
-                    raise ERROR_REQUIRED_PARAMETER(key=f"secret_data.{key}")
-        case _:
-            raise ERROR_INVALID_PARAMETER(
-                key="options.provider", reason="Not supported provider."
-            )
+    if provider in ["aws", "azure", "google_cloud"]:
+        missing_keys = [key for key in REQUIRED_SECRET_KEYS[provider] if key not in secret_data]
+        if missing_keys:
+            for key in missing_keys:
+                raise ERROR_REQUIRED_PARAMETER(key=f"secret_data.{key}")
+    else:
+        raise ERROR_INVALID_PARAMETER(
+            key="options.provider", reason="Not supported provider."
+        )
