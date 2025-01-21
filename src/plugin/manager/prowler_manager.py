@@ -56,7 +56,7 @@ class ProwlerManager(ResourceManager):
             self.compliance_results.clear()
 
             err_message = None
-            for check_results, err_message in self.prowler_connector.check2(
+            for check_results, err_message in self.prowler_connector.check(
                     options, secret_data
             ):
                 if check_results:
