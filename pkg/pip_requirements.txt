@@ -2,3 +2,4 @@ spaceone-core
 spaceone-api
 prowler==4.4
 natsort
+ijson
