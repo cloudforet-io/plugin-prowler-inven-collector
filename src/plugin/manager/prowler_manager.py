@@ -1,15 +1,10 @@
-import os
-
-import json
 import time
 import random
 import logging
-from typing import Generator, List
+from typing import Generator
 
 from natsort import natsorted
 from prowler.lib.check.compliance_models import Compliance
-from prowler.lib.check.models import CheckMetadata
-from spaceone.inventory.plugin.collector.lib import make_cloud_service, make_error_response
 
 from plugin.error.custom import *
 from plugin.manager.base import ResourceManager
@@ -38,117 +33,112 @@ class ProwlerManager(ResourceManager):
         self.checklist = []
         self.is_custom_checks = False
         self.checks_metadata = {}
+        self.compliance_results = {}
 
     def collect_cloud_services(
             self, options: dict, secret_data: dict, schema: str
     ) -> Generator[dict, None, None]:
-        self.provider = options.get("provider")
-        self.cloud_service_type = options["compliance_framework"]
+        try:
+            self.provider = options.get("provider")
+            self.cloud_service_type = options["compliance_framework"]
 
-        if self.provider == "aws":
-            self.is_primary = True
+            if self.provider == "aws":
+                self.is_primary = True
 
-        self.checklist = options.get("check_list")
-        self.prowler_connector = ProwlerConnector()
-        self._check_compliance_framework()
-        self._load_requirement_info()
+            self.checklist = options.get("check_list")
+            self.prowler_connector = ProwlerConnector()
+            self._check_compliance_framework()
 
-        self._wait_random_time()
+            if not self.requirement_info:
+                self._load_requirement_info()
 
-        check_results, err_message = self.prowler_connector.check(
-            options, secret_data
+            self._wait_random_time()
+            self.compliance_results.clear()
+
+            err_message = None
+            for check_results, err_message in self.prowler_connector.check2(
+                    options, secret_data
+            ):
+                if check_results:
+                    self.make_compliance_results(check_results)
+
+            # Return compliance results (Cloud Services)
+            for compliance_result in self._convert_results(self.compliance_results):
+                yield compliance_result
+
+            if err_message:
+                _LOGGER.error(f"[{self.__repr__()}.collect_cloud_services] Error: {err_message}")
+                raise Exception(err_message)
+        finally:
+            self.compliance_results.clear()
+
+
+    def make_compliance_results(self, check_result: dict):
+        check_id = check_result["metadata"]["event_code"]
+        account = check_result["cloud"]["account"]["uid"]
+        requirement_ids = check_result["unmapped"].get("compliance", {}).get(
+            self.cloud_service_type, []
         )
-
-        # Return compliance results (Cloud Services)
-        for compliance_result in self.make_compliance_results(check_results):
-            yield compliance_result
-            # yield make_cloud_service(
-            #     name=compliance_result["name"],
-            #     cloud_service_type=self.cloud_service_type,
-            #     cloud_service_group=self.cloud_service_group,
-            #     provider=self.provider,
-            #     account=compliance_result["account"],
-            #     data=compliance_result,
-            #     region_code="global",
-            #     reference={
-            #         "resource_id": compliance_result["reference"]["resource_id"],
-            #     },
-            #     data_format="grpc",
-            # )
-        if err_message:
-            _LOGGER.error(f"[{self.__repr__()}.collect_cloud_services] Error: {err_message}")
-            raise Exception(err_message)
-
-    def make_compliance_results(self, check_results: List[dict]) -> List[dict]:
-        compliance_results = {}
-        for check_result in check_results:
-            check_id = check_result["metadata"]["event_code"]
-            account = check_result["cloud"]["account"]["uid"]
-            requirements = check_result["unmapped"].get("compliance", {}).get(
-                self.cloud_service_type, []
+        for requirement_id in requirement_ids:
+            requirement_seq = next(
+                (requirement['Requirement_Seq']
+                 for requirement in self.requirement_info[self.cloud_service_type]['Requirements']
+                 if requirement['Id'] == requirement_id and check_id in requirement['Checks']
+                 ),
+                None
             )
-            for requirement_id in requirements:
-                requirement_seq = next(
-                    (requirement['Requirement_Seq']
-                     for requirement in self.requirement_info[self.cloud_service_type]['Requirements']
-                     if requirement['Id'] == requirement_id and check_id in requirement['Checks']
-                     ),
-                    None
+
+            compliance_id = (
+                f"prowler:{self.provider}:{account}:{self.cloud_service_type}:{requirement_id}:"
+                f"{str(requirement_seq)}"
+            ).lower()
+            status = check_result["status_code"]
+            region_code = check_result["cloud"]["region"]
+            severity = SEVERITY_MAP.get(check_result["severity"], "UNKNOWN")
+            score = SEVERITY_SCORE_MAP[severity]
+
+            if compliance_id not in self.compliance_results:
+                self.compliance_results[
+                    compliance_id
+                ] = self._make_base_compliance_result(
+                    compliance_id, requirement_id, requirement_seq, check_id, severity, check_result
                 )
 
-                compliance_id = (
-                    f"prowler:{self.provider}:{account}:{self.cloud_service_type}:{requirement_id}:" 
-                    f"{str(requirement_seq)}"
-                ).lower()
-                status = check_result["status_code"]
-                region_code = check_result["cloud"]["region"]
-                severity = SEVERITY_MAP.get(check_result["severity"], "UNKNOWN")
-                score = SEVERITY_SCORE_MAP[severity]
+            check_exists = (
+                    check_id in self.compliance_results[compliance_id]["data"]["checks"]
+            )
 
-                if compliance_id not in compliance_results:
-                    compliance_results[
-                        compliance_id
-                    ] = self._make_base_compliance_result(
-                        compliance_id, requirement_id, requirement_seq, check_id, severity, check_result
-                    )
+            if self.compliance_results[compliance_id]["region_code"] != region_code:
+                self.compliance_results[compliance_id]["region_code"] = "global"
 
-                check_exists = (
-                        check_id in compliance_results[compliance_id]["data"]["checks"]
-                )
+            self.compliance_results[compliance_id]["data"][
+                "severity"
+            ] = self._update_severity(
+                self.compliance_results[compliance_id]["data"]["severity"], severity
+            )
 
-                if compliance_results[compliance_id]["region_code"] != region_code:
-                    compliance_results[compliance_id]["region_code"] = "global"
+            self.compliance_results[compliance_id][
+                "data"
+            ] = self._update_compliance_status_and_stats(
+                self.compliance_results[compliance_id]["data"], status, score
+            )
 
-                compliance_results[compliance_id]["data"][
-                    "severity"
-                ] = self._update_severity(
-                    compliance_results[compliance_id]["data"]["severity"], severity
-                )
+            self.compliance_results[compliance_id]["data"]["findings"].append(
+                self._make_finding(check_result)
+            )
 
-                compliance_results[compliance_id][
-                    "data"
-                ] = self._update_compliance_status_and_stats(
-                    compliance_results[compliance_id]["data"], status, score
-                )
-
-                compliance_results[compliance_id]["data"]["findings"].append(
-                    self._make_finding(check_result)
-                )
-
-                if not check_exists:
-                    compliance_results[compliance_id]["data"]["checks"][
-                        check_id
-                    ] = self._make_check(check_result)
-
-                compliance_results[compliance_id]["data"]["checks"][
+            if not check_exists:
+                self.compliance_results[compliance_id]["data"]["checks"][
                     check_id
-                ] = self._update_check_status_and_stats(
-                    compliance_results[compliance_id]["data"]["checks"][check_id],
-                    status,
-                    score,
-                )
+                ] = self._make_check(check_result)
 
-        return self._convert_results(compliance_results)
+            self.compliance_results[compliance_id]["data"]["checks"][
+                check_id
+            ] = self._update_check_status_and_stats(
+                self.compliance_results[compliance_id]["data"]["checks"][check_id],
+                status,
+                score,
+            )
 
     def _convert_results(self, compliance_results):
         results = []
@@ -365,7 +355,7 @@ class ProwlerManager(ResourceManager):
                 "requirement_id": requirement_id,
                 "requirement_seq": requirement_seq,
                 "automation": automation,
-                "description": check_result["finding_info"]["desc"] if check_id else "",
+                "description": check_result["finding_info"]["desc"] if check_id else requirement_name,
                 "status": "UNSUPPORTED" if not automation else ("PASS" if check_id else "UNKNOWN"),
                 "severity": severity if check_id else "",
                 "service": check_result["resources"][0]["group"]["name"] if check_id else "",
@@ -440,11 +430,11 @@ class ProwlerManager(ResourceManager):
         )
         sorted_requirements = natsorted(compliance_frameworks[compliance_framework].Requirements,
                                         key=lambda x: (x.Id, x.Description))
-        frameworks[self.cloud_service_type] = json.loads(compliance_frameworks[compliance_framework].json())
+        frameworks[self.cloud_service_type] = compliance_frameworks[compliance_framework].dict()
         frameworks[self.cloud_service_type]['Requirements'] = []
 
         for i, requirement in enumerate(sorted_requirements):
-            requirement_json = json.loads(requirement.json())
+            requirement_json = requirement.dict()
             requirement_checks = requirement_json.get('Checks', [])
             requirement_json['Requirement_Seq'] = i + 1
             requirement_json['Automation'] = bool(requirement_checks)

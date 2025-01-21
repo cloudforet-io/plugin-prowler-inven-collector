@@ -3,9 +3,9 @@ import logging
 import re
 import tempfile
 import subprocess
+import ijson
 from typing import List
 
-from spaceone.core import utils
 from spaceone.core.connector import BaseConnector
 from plugin.conf.collector_conf import COMPLIANCE_FRAMEWORKS
 
@@ -84,15 +84,18 @@ class ProwlerConnector(BaseConnector):
             last_message = re.sub(r'\x1b\[[0-9;]*m','',last_line)
 
             if 'there are no findings' in last_message.lower():
-                return [], last_message
+                yield {}, last_message
             else:
                 output_json_file = os.path.join(temp_dir, "output.ocsf.json")
                 if os.path.exists(output_json_file):
-                    check_results = utils.load_json_from_file(output_json_file)
-                    return check_results, err_message
+                    with open(output_json_file,'rb') as file:
+                        objects = ijson.items(file, 'item')
+                        obj = next(objects, None)
+                        while obj is not None:
+                            yield obj, err_message
+                            obj = next(objects, None)
                 else:
-                    return [], err_message
-
+                    yield {}, err_message
 
     @staticmethod
     def _command_prefix(provider: str, profile_name: str) -> List[str]:

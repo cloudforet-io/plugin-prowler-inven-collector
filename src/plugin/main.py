@@ -6,7 +6,7 @@ from spaceone.inventory.plugin.collector.lib.server import CollectorPluginServer
 from spaceone.core.error import ERROR_INVALID_PARAMETER, ERROR_REQUIRED_PARAMETER
 from plugin.conf.global_conf import *
 from plugin.conf.collector_conf import *
-from .manager.prowler_manager import ProwlerManager
+from plugin.manager.prowler_manager import ProwlerManager
 
 app = CollectorPluginServer()
 
